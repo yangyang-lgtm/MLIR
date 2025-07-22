@@ -2,6 +2,7 @@ set(CUR_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/../../include/Dialect")
 
 set(TD_FILES
   "NorthStarDialect:dialect"
+  "NorthStarTypes:typedef"
 )
 
 foreach(ITEM IN LISTS TD_FILES)
