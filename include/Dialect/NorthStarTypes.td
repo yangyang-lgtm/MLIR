@@ -1,4 +1,3 @@
-
 #ifndef DIALECT_NORTH_STAR_TYPES_TD
 #define DIALECT_NORTH_STAR_TYPES_TD
 include "mlir/IR/DialectBase.td"

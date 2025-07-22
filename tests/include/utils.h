@@ -22,9 +22,9 @@ struct TestEntry {
 
   void apply() {
     for (const auto& test_case : cases_) {
-      std::cout << "run test : " << test_case.first << std::endl;
+      std::cout << "-------------------------- run test : " << test_case.first << "--------------------------" << std::endl;
       test_case.second->run_test();
-      std::cout << "test : "<< test_case.first << " done" << std::endl;
+      std::cout << "-------------------------- test : "<< test_case.first << " done --------------------------" << std::endl;
     }
   }
 

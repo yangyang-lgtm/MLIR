@@ -7,6 +7,7 @@ namespace mlir::north_star {
 void NorthStarDialect::initialize() {
   llvm::outs() << "initializing " << getDialectNamespace() << "\n";
   registerType();
+  registerAttrs();
 }
 
 NorthStarDialect::~NorthStarDialect() {
