@@ -16,7 +16,7 @@
 
 namespace mlir::north_star {
 
-void NorthStarDialect::registerType() {
+void NorthStarDialect::registerTypes() {
   llvm::outs() << "register " << getDialectNamespace() << "  Type\n";
   addTypes<
 #define GET_TYPEDEF_LIST
@@ -69,6 +69,19 @@ void NSTensorType::print(AsmPrinter &printer) const {
   printer << ",";
   printer << getDeviceId();
   printer << ">";
+}
+
+::llvm::LogicalResult BufferType::verify(
+    ::llvm::function_ref<::mlir::InFlightDiagnostic()> emitError,
+    ::llvm::ArrayRef<int64_t> devices) {
+  if (std::set(devices.begin(), devices.end()).size() != devices.size())
+    return emitError() << "Duplicate device ids";
+  for (auto id : devices) {
+    if (id < 0) {
+      return emitError() << "Invalid device id";
+    }
+  }
+  return llvm::success();
 }
 
 }  // namespace mlir::north_star

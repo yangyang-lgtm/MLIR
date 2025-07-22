@@ -1,6 +1,7 @@
 #ifndef DIALECT_NORTH_STAR
 #define DIALECT_NORTH_STAR
 include "mlir/IR/DialectBase.td"
+include "Dialect/NorthStarConstraints.td"
 
 def NorthStar_Dialect : Dialect{
   // 方言的名字
@@ -24,8 +25,9 @@ def NorthStar_Dialect : Dialect{
   // 额外的声明.
   let extraClassDeclaration = [{
     static void sayHello();
-    void registerType();
+    void registerTypes();
     void registerAttrs();
+    void registerOps();
   }];
 
   // 规范化的声明. [14]

@@ -14,6 +14,7 @@ class NorthStar_Type<string name, string typeMnemonic, list<Trait> traits = [],
   let typeName =  dialect.name # "." # typeMnemonic;
 }
 
+
 def NorthStar_TensorType : NorthStar_Type<"NSTensor","ns_tensor",[]>{
   // 概述
   let summary = " the summary of north-star tensor type";
@@ -67,5 +68,27 @@ def NorthStar_TensorType : NorthStar_Type<"NSTensor","ns_tensor",[]>{
     // }
   }];
 }
+
+
+def NorthStar_BufferType : NorthStar_Type<"Buffer","buffer",[]>{
+  let summary = " the summary of north-star buffer type";
+
+  let description = "description of north-star buffer type";
+
+  let parameters = (ins
+    ArrayRefParameter<"int64_t">:$devices
+  );
+
+  let genStorageClass = 1;
+
+  let hasStorageCustomConstructor = 0;
+
+  let assemblyFormat = "`<`$devices`>`";
+
+  let skipDefaultBuilders = 0;
+
+  let genVerifyDecl = 1;
+}
+
 
 #endif // DIALECT_NORTH_STAR_TYPES_TD

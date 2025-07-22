@@ -5,6 +5,7 @@ set(TD_FILES
   "NorthStarTypes:typedef"
   "NorthStarEunms:enum"
   "NorthStarAttrs:attrdef"
+  "NorthStarOps:op"
 )
 
 foreach(ITEM IN LISTS TD_FILES)
