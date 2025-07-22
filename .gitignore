@@ -1,0 +1,11 @@
+vscode/
+.idea/
+*.swn
+*.swo
+*.swp
+*~
+.DS_Store
+.gdb_history
+
+.cache/
+build/
