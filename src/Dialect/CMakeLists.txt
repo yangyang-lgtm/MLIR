@@ -21,7 +21,8 @@ add_mlir_dialect_library(MLIRNorthStarDialect
   NorthStarDialectIncGen
 
  LINK_LIBS PUBLIC
+  MLIRDistributeParallelismInterfaces
+  MLIRTutorialUtils
   MLIRIR
   MLIRTensorDialect
-  MLIRDistributeParallelismInterfaces
 )

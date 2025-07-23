@@ -11,7 +11,7 @@ add_public_tablegen_target(MLIRDistributeParallelismInterfacesIncGen)
 
 file(GLOB_RECURSE SRCS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-add_mlir_dialect_library(MLIRDistributeParallelismInterfaces
+add_mlir_library(MLIRDistributeParallelismInterfaces
   ${SRCS}
 
  DEPENDS

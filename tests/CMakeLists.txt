@@ -14,5 +14,8 @@ foreach(TEST_CASE ${MAPSC_TEST_SRCS})
     MLIRIR
     MLIRTensorDialect
     MLIRFuncDialect
+    MLIRSCFDialect
+    MLIRLinalgDialect
+    MLIRParser
   )
 endforeach()

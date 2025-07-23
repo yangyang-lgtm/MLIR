@@ -42,5 +42,5 @@ inline thread_local TestEntry entry;
 struct Case##name : public TestBase {                             \
   void run_test() override;                                       \
 };                                                                \
-static auto i = entry.register_case<Case##name>(#name);           \
+static auto i_##name = entry.register_case<Case##name>(#name);    \
 void Case##name::run_test()
