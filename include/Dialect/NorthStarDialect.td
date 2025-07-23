@@ -1,5 +1,6 @@
 #ifndef DIALECT_NORTH_STAR
 #define DIALECT_NORTH_STAR
+
 include "mlir/IR/DialectBase.td"
 include "Dialect/NorthStarConstraints.td"
 

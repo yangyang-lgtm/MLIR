@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <chrono>
 
 struct TestBase {
   virtual void run_test() = 0;
@@ -23,8 +24,11 @@ struct TestEntry {
   void apply() {
     for (const auto& test_case : cases_) {
       std::cout << "-------------------------- run test : " << test_case.first << "--------------------------" << std::endl;
+      auto start = std::chrono::high_resolution_clock::now();
       test_case.second->run_test();
-      std::cout << "-------------------------- test : "<< test_case.first << " done --------------------------" << std::endl;
+      auto end = std::chrono::high_resolution_clock::now();
+      auto elapsed_ms = std::chrono::duration<double, std::milli>(end - start).count();
+      std::cout << "-------------------------- test : "<< test_case.first << " done : " << elapsed_ms << " ms --------------------------" << std::endl;
     }
   }
 

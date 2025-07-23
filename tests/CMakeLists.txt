@@ -13,5 +13,6 @@ foreach(TEST_CASE ${MAPSC_TEST_SRCS})
   target_link_libraries(${CASE_NAME} PRIVATE ${MAIN_LIB_NAME}
     MLIRIR
     MLIRTensorDialect
+    MLIRFuncDialect
   )
 endforeach()

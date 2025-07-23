@@ -23,6 +23,7 @@
 
 #include "Dialect/NorthStarAttrs.h"
 #include "Dialect/NorthStarDialect.h"
+#include "Dialect/NorthStarTypes.h"
 #include "Dialect/NorthStarOps.h"
 
 TEST(Ops) {

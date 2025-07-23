@@ -11,7 +11,7 @@ class NorthStar_Op<string mnemonic, list<Trait> traits = []>
 }
 
 class NorthStar_UnaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
-    NorthStar_Op<mnemonic, traits#[]>{
+    NorthStar_Op<mnemonic, [DeclareOpInterfaceMethods<DistributeParallelOp>] # traits>{
     let arguments = !con((ins
         OperandType:$input),
         attributes
@@ -22,7 +22,7 @@ class NorthStar_UnaryOp<string mnemonic,Type OperandType, Type resultType = Oper
 }
 
 class NorthStar_BinaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
-    NorthStar_Op<mnemonic, traits#[]>{
+    NorthStar_Op<mnemonic, [DeclareOpInterfaceMethods<DistributeParallelOp>] # traits>{
     let arguments = !con((ins
         OperandType:$lhs,
         OperandType:$rhs),
@@ -33,6 +33,12 @@ class NorthStar_BinaryOp<string mnemonic,Type OperandType, Type resultType = Ope
         resultType:$result);
 }
 
+class NorthStar_ElewiseUnaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
+    NorthStar_UnaryOp<mnemonic, OperandType, resultType, [DeclareOpInterfaceMethods<SupportedDataParallelismOp>] # traits, attributes>;
+
+class NorthStar_ElewiseBinaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
+    NorthStar_BinaryOp<mnemonic, OperandType, resultType, [DeclareOpInterfaceMethods<SupportedDataParallelismOp>] # traits,attributes>;
+
 def NorthStar_ConstOp : NorthStar_Op<"const",[]>{
     let arguments = (ins
         ElementsAttr:$value);
@@ -40,7 +46,7 @@ def NorthStar_ConstOp : NorthStar_Op<"const",[]>{
         AnyNSTensor:$result);
 }
 
-def NorthStar_SoftmaxOp : NorthStar_UnaryOp<"softmax",AnyNSTensor, AnyNSTensor, [], (ins I64Attr:$axis)>{
+def NorthStar_SoftmaxOp : NorthStar_UnaryOp<"softmax",AnyNSTensor, AnyNSTensor, [DeclareOpInterfaceMethods<SupportedDataParallelismOp,["applyDataParallelism","supportedDataParallelism"]>], (ins I64Attr:$axis)>{
     let hasVerifier = 1;
     let builders = [
         OpBuilder<(ins "::mlir::Value":$input, "int64_t":$axis) ,
@@ -53,7 +59,7 @@ def NorthStar_SoftmaxOp : NorthStar_UnaryOp<"softmax",AnyNSTensor, AnyNSTensor, 
     ];
 }
 
-def NorthStar_ExpOp : NorthStar_UnaryOp<"exp",AnyNSTensor>{
+def NorthStar_ExpOp : NorthStar_ElewiseUnaryOp<"exp",AnyNSTensor>{
     let builders = [
         OpBuilder<(ins "::mlir::Value":$input) ,
             [{
@@ -63,16 +69,27 @@ def NorthStar_ExpOp : NorthStar_UnaryOp<"exp",AnyNSTensor>{
     ];
 }
 
-def NorthStar_AddOp : NorthStar_BinaryOp<"add",AnyNSTensor>;
-def NorthStar_SubOp : NorthStar_BinaryOp<"sub",AnyNSTensor>;
-def NorthStar_MulOp : NorthStar_BinaryOp<"mul",AnyNSTensor>;
-def NorthStar_DivOp : NorthStar_BinaryOp<"div",AnyNSTensor>;
+def NorthStar_AddOp : NorthStar_ElewiseBinaryOp<"add",AnyNSTensor>;
+def NorthStar_SubOp : NorthStar_ElewiseBinaryOp<"sub",AnyNSTensor>;
+def NorthStar_MulOp : NorthStar_ElewiseBinaryOp<"mul",AnyNSTensor>;
+def NorthStar_DivOp : NorthStar_ElewiseBinaryOp<"div",AnyNSTensor>;
 
 def NorthStar_AllToAllOp : NorthStar_Op<"all_to_all",[]>{
     let arguments = (ins
         AnyBuffer:$input,
         AnyBuffer:$output
     );
+}
+
+def NorthStar_BufferCastOp : NorthStar_Op<"buffer_cast",[]>{
+    let description = "对数据切分的标记";
+    let arguments = (ins
+        Variadic<NSTensorOrBuffer>:$inputs,
+        DistributeParallelAttr:$distribute_attr
+    );
+    let results = (outs
+        Variadic<NSTensorOrBuffer>:$outputs);
+    let hasVerifier = 1;
 }
 
 def NorthStar_BufferOp : NorthStar_Op<"buffer",[]>{

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Dialect/NorthStarTypes.h"
+#include "Dialect/NorthStarAttrs.h"
 
 #define GET_OP_CLASSES
 #include "Dialect/NorthStarOps.h.inc"

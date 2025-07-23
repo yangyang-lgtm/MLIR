@@ -1,10 +1,10 @@
 #ifndef DIALECT_NORTH_STAR_TYPES_TD
 #define DIALECT_NORTH_STAR_TYPES_TD
+
 include "mlir/IR/DialectBase.td"
 include "mlir/IR/Traits.td"
 include "mlir/IR/AttrTypeBase.td"
 include "mlir/IR/BuiltinTypeInterfaces.td"
-
 include "Dialect/NorthStarDialect.td"
 
 class NorthStar_Type<string name, string typeMnemonic, list<Trait> traits = [],
@@ -14,8 +14,7 @@ class NorthStar_Type<string name, string typeMnemonic, list<Trait> traits = [],
   let typeName =  dialect.name # "." # typeMnemonic;
 }
 
-
-def NorthStar_TensorType : NorthStar_Type<"NSTensor","ns_tensor",[]>{
+def NorthStar_TensorType : NorthStar_Type<"NSTensor","ns_tensor",[ShapedTypeInterface],"::mlir::TensorType">{
   // 概述
   let summary = " the summary of north-star tensor type";
 
@@ -54,21 +53,37 @@ def NorthStar_TensorType : NorthStar_Type<"NSTensor","ns_tensor",[]>{
   let genVerifyDecl = 1;
 
   let extraClassDeclaration = [{
-    // using TensorType::clone;
-    // using ShapedType::Trait<NSTensorType>::getElementTypeBitWidth;
-    // using ShapedType::Trait<NSTensorType>::getRank;
-    // using ShapedType::Trait<NSTensorType>::getNumElements;
-    // using ShapedType::Trait<NSTensorType>::isDynamicDim;
-    // using ShapedType::Trait<NSTensorType>::hasStaticShape;
-    // using ShapedType::Trait<NSTensorType>::getNumDynamicDims;
-    // using ShapedType::Trait<NSTensorType>::getDimSize;
-    // using ShapedType::Trait<NSTensorType>::getDynamicDimIndex;
-    // NSTensorType clone(::mlir::Type elementType) {
-    //   return ::llvm::cast<NSTensorType>(cloneWith(getShape(), elementType));
-    // }
-  }];
-}
+    using ::mlir::ShapedType::Trait<NSTensorType>::getElementTypeBitWidth;
+    using ::mlir::ShapedType::Trait<NSTensorType>::getRank;
+    using ::mlir::ShapedType::Trait<NSTensorType>::getNumElements;
+    using ::mlir::ShapedType::Trait<NSTensorType>::isDynamicDim;
+    using ::mlir::ShapedType::Trait<NSTensorType>::hasStaticShape;
+    using ::mlir::ShapedType::Trait<NSTensorType>::getNumDynamicDims;
+    using ::mlir::ShapedType::Trait<NSTensorType>::getDimSize;
+    using ::mlir::ShapedType::Trait<NSTensorType>::getDynamicDimIndex;
 
+    ::mlir::ShapedType cloneWith(::std::optional<::llvm::ArrayRef<int64_t>> shape, ::mlir::Type type){
+        if(shape)
+          return mlir::north_star::NSTensorType::get(getContext(), *shape, type);
+        return mlir::north_star::NSTensorType::get(getContext(), getShape(), type);
+    }
+    NSTensorType clone(::mlir::ArrayRef<int64_t> shape,int64_t device_id) const {
+      return NSTensorType::get(getContext(), shape, getElementType(),device_id);
+    }
+    NSTensorType clone(::mlir::ArrayRef<int64_t> shape, ::mlir::Type elementType) const {
+      return NSTensorType::get(getContext(), shape, elementType,getDeviceId());
+    }
+    NSTensorType clone(::mlir::ArrayRef<int64_t> shape) const {
+      return NSTensorType::get(getContext(), shape, getElementType(),getDeviceId());
+    }
+    NSTensorType clone(::mlir::Type elementType) const {
+      return NSTensorType::get(getContext(), getShape(), elementType,getDeviceId());
+    }
+    NSTensorType clone() const {
+      return NSTensorType::get(getContext(), getShape(), getElementType(),getDeviceId());
+    }
+    }];
+}
 
 def NorthStar_BufferType : NorthStar_Type<"Buffer","buffer",[]>{
   let summary = " the summary of north-star buffer type";
@@ -89,6 +104,5 @@ def NorthStar_BufferType : NorthStar_Type<"Buffer","buffer",[]>{
 
   let genVerifyDecl = 1;
 }
-
 
 #endif // DIALECT_NORTH_STAR_TYPES_TD
