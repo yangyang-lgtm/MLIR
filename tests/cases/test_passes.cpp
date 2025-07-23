@@ -1,14 +1,18 @@
 #include "utils.h"
 
-#include <iostream>
-
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/StringRef.h"
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/Path.h"
 #include "llvm/Support/raw_ostream.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/Dialect/GPU/IR/GPUDialect.h"
+#include "mlir/Dialect/Linalg/IR/Linalg.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
+#include "mlir/IR/Attributes.h"
 #include "mlir/IR/Block.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinAttributes.h"
@@ -18,15 +22,19 @@
 #include "mlir/IR/DialectRegistry.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/OperationSupport.h"
+#include "mlir/IR/Region.h"
+#include "mlir/IR/Types.h"
+#include "mlir/IR/Value.h"
 #include "mlir/IR/ValueRange.h"
 #include "mlir/IR/Visitors.h"
+#include "mlir/Pass/PassManager.h"
 #include "mlir/Support/LLVM.h"
 
 #include "Dialect/NorthStarAttrs.h"
 #include "Dialect/NorthStarDialect.h"
 #include "Dialect/NorthStarOps.h"
 #include "Dialect/NorthStarTypes.h"
-#include "Interfaces/DistributeParallelismInterfaces.h"
+#include "Passes/Passes.h"
 
 #include "Utils/Key.h"
 
@@ -54,59 +62,32 @@ static mlir::ModuleOp getModule(mlir::OpBuilder& builder) {
       loc, block->getArgument(0), 1);
   softmax_op = builder.create<mlir::north_star::SoftmaxOp>(loc, softmax_op, 1);
   builder.create<mlir::func::ReturnOp>(loc, mlir::ValueRange{softmax_op});
+
   return module;
 }
 
-TEST(Interfaces) {
+TEST(Passes) {
   mlir::DialectRegistry registry;
   mlir::MLIRContext context(registry);
   context.getOrLoadDialect<mlir::north_star::NorthStarDialect>();
   context.getOrLoadDialect<mlir::func::FuncDialect>();
 
-  auto f32 = mlir::Float32Type::get(&context);
-  auto dim = mlir::ShapedType::kDynamic;
-  auto shape = mlir::SmallVector<int64_t>({dim, dim, 24});
-  auto tensor_type =
-      mlir::north_star::NSTensorType::get(&context, shape, f32, 0);
-  auto shaped_type = mlir::cast<mlir::ShapedType>(tensor_type);
-  llvm::outs() << "NSTensorType: \t";
-  tensor_type.dump();
-  llvm::outs() << "Shaped Type Interface:\t";
-  shaped_type.dump();
-  auto cloned_type = shaped_type.clone(f32);
-  llvm::outs() << "Cloned Shaped Type Interface:\t";
-  cloned_type.dump();
-
-  auto dp_attr = mlir::north_star::DataParallelismAttr::get(&context, 2);
-  llvm::outs() << dp_attr.getAbstractAttribute().getName()
-               << " has mlir::DataParallelAttr interface: "
-               << dp_attr.getAbstractAttribute().hasInterface(
-                      mlir::DistributeParallelAttr::getInterfaceID())
-               << "\n";
-  llvm::outs()
-      << dp_attr.getAbstractAttribute().getName()
-      << " has mlir::DataParallelAttr interface: "
-      << dp_attr.hasPromiseOrImplementsInterface<mlir::DataParallelAttr>()
-      << "\n";
-
   mlir::OpBuilder builder(&context);
   auto loc = builder.getUnknownLoc();
   auto module = getModule(builder);
+  mlir::PassManager pm(&context);
+
+  mlir::north_star::MarkDistributeParallelParametersPassOptions
+      mark_distribute_parallel_option{.DPNums = 3, .TPNums = 1};
+  pm.addPass(mlir::north_star::createMarkDistributeParallelParametersPass(
+      mark_distribute_parallel_option));
+  pm.addNestedPass<mlir::func::FuncOp>(
+      mlir::north_star::createApplyDistributeTransformPass());
   module->dump();
-  module->walk([](mlir::func::FuncOp func) {
-    if (auto dp_attr = llvm::dyn_cast_or_null<mlir::DistributeParallelAttr>(
-            func->getAttr(KDPAttrName))) {
-      func->walk([&](mlir::Operation* op) {
-        if (auto dis_op =
-                llvm::dyn_cast_or_null<mlir::DistributeParallelOp>(op)) {
-          if (dis_op.applyDistributeParallelism(dp_attr).succeeded()) {
-            llvm::outs() << "Apply DataParallelism to " << op->getName()
-                         << "\n";
-            op->erase();
-          };
-        }
-      });
-    }
-  });
+
+  if (pm.run(module).failed()) {
+    llvm::outs() << "run pass error!\n";
+  };
+  llvm::outs() << "after pass:\n";
   module->dump();
 }

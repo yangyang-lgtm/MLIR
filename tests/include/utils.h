@@ -22,8 +22,9 @@ struct TestEntry {
   }
 
   void apply() {
+    size_t idx = 0;
     for (const auto& test_case : cases_) {
-      std::cout << "-------------------------- run test : " << test_case.first << "--------------------------" << std::endl;
+      std::cout << "-------------------------- run test " << ++idx << " : " << test_case.first << "--------------------------" << std::endl;
       auto start = std::chrono::high_resolution_clock::now();
       test_case.second->run_test();
       auto end = std::chrono::high_resolution_clock::now();
