@@ -2,13 +2,30 @@
 
 #include <algorithm>
 
+#include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/MapVector.h"
+#include "llvm/ADT/PointerIntPair.h"
 #include "llvm/ADT/STLExtras.h"
+#include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/StringRef.h"
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/LogicalResult.h"
+#include "llvm/Support/ScopedPrinter.h"
+#include "llvm/Support/raw_ostream.h"
+#include "mlir/IR/Block.h"
+#include "mlir/IR/BuiltinTypeInterfaces.h"
+#include "mlir/IR/Location.h"
+#include "mlir/IR/Operation.h"
+#include "mlir/IR/TypeRange.h"
 #include "mlir/IR/Value.h"
+#include "mlir/IR/ValueRange.h"
+#include "mlir/Support/LLVM.h"
 
 #include "Dialect/NorthStarDialect.h"
 #include "Dialect/NorthStarTypes.h"
+#include "Dialect/Utils.h"
 
 #define GET_OP_CLASSES
 #include "Dialect/NorthStarOps.cpp.inc"
@@ -153,4 +170,60 @@ llvm::SmallVector<Type> splitTensor(const NSTensorType& tensor, int dim,
 
 bool SoftmaxOp::supportedDataParallelism() { return getAxis() != 0; }
 
+::llvm::LogicalResult DeviceKernelOp::verify() { return llvm::success(); }
+
+llvm::LogicalResult DeviceKernelOp::FusionOps(::mlir::RewriterBase& rewriter,
+                               mlir::ArrayRef<::mlir::Operation*> ops,
+                               ::mlir::Location loc) {
+  if (ops.size() == 0) return llvm::failure();
+  auto name = getFusionName(ops);
+  auto device_id = getDeviceid(ops);
+  Block block;
+
+  auto inputs_map = getFusionInputs(ops);
+  auto outputs_map = getFusionOutputs(ops);
+  llvm::SmallVector<Value> inputs_val;
+  llvm::SmallVector<Value> output_val;
+  llvm::SmallVector<Type> outputs_type;
+  for (auto [key, val] : inputs_map) {
+    inputs_val.push_back(key);
+  }
+  for (auto [key, val] : outputs_map) {
+    outputs_type.push_back(key.getType());
+  }
+  auto kernel = rewriter.create<DeviceKernelOp>(loc, outputs_type, name,
+                                                device_id, inputs_val);
+  kernel->getRegion(0).push_back(&block);
+  std::map<Operation*, Operation*> op_map;
+  for (auto op : ops) {
+    auto clone_op = op->clone();
+    block.push_back(clone_op);
+    op_map[op] = clone_op;
+    for (auto [index, operand] : llvm::enumerate(op->getOperands())) {
+      if (isa<BlockArgument>(operand)) continue;
+      if (op_map.find(operand.getDefiningOp()) != op_map.end()) {
+        op_map[op]->setOperand(
+            index,
+            op_map[operand.getDefiningOp()]->getResult(
+                llvm::cast_or_null<OpResult>(operand).getResultNumber()));
+      }
+    }
+  }
+  for (auto [key, val] : outputs_map) {
+    output_val.push_back(op_map[val.first]->getResult(val.second));
+  }
+  for (auto [index, key] : llvm::enumerate(inputs_map)) {
+    auto arg = block.addArgument(key.first.getType(), loc);
+    op_map[key.second.first]->setOperand(key.second.second, arg);
+  }
+  auto insert_point = rewriter.saveInsertionPoint();
+  rewriter.setInsertionPointToEnd(&block);
+  rewriter.create<ReturnOp>(loc, output_val);
+  rewriter.setInsertionPoint(insert_point.getBlock(), insert_point.getPoint());
+  for (auto [index, key] : llvm::enumerate(outputs_map)) {
+    rewriter.replaceAllUsesWith(key.first, kernel->getResult(index));
+  }
+  kernel->getParentOp()->dump();;
+  return llvm::success();
+}
 }  // namespace mlir::north_star

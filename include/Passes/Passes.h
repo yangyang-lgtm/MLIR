@@ -4,6 +4,10 @@
 
 namespace mlir::north_star {
 
+void populateBufferCastOpCanonicalizationPatterns(RewritePatternSet &patterns);
+
+void populateDeviceRegionFusionPatterns(RewritePatternSet &patterns);
+
 std::unique_ptr<::mlir::Pass> createApplyDistributeTransformPass();
 
 #define GEN_PASS_DECL

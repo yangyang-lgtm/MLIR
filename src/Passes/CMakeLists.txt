@@ -20,4 +20,7 @@ add_mlir_library(MLIRNorthStarPasses
 
  LINK_LIBS PUBLIC
   MLIRNorthStarDialect
+  MLIRPass
+  MLIRTransforms
+  MLIRTransformUtils
 )

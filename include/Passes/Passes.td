@@ -32,4 +32,15 @@ def ApplyDistributeTransformPass : Pass<"apply-distribute-transform","::mlir::fu
   let constructor = "mlir::north_star::createApplyDistributeTransformPass()";
 }
 
+def DeviceRegionFusionPass : Pass<"device-region-fusion","::mlir::func::FuncOp"> {
+  let summary = "相同device的计算合并";
+  let description = [{
+    "相同device的计算合并"
+  }];
+  let dependentDialects = [
+    "::mlir::north_star::NorthStarDialect",
+    "::mlir::tensor::TensorDialect"
+  ];
+}
+
 #endif  // DIALECT_NORTH_STAR_TRANSFORMS_PASSES_TD

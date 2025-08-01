@@ -1,7 +1,15 @@
 #ifndef DIALECT_NORTH_STAR_OPS_TD
 #define DIALECT_NORTH_STAR_OPS_TD
 
+include "mlir/IR/OpAsmInterface.td"
+include "mlir/IR/SymbolInterfaces.td"
+include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/Interfaces/FunctionInterfaces.td"
+include "mlir/Interfaces/CallInterfaces.td"
+include "mlir/Interfaces/ControlFlowInterfaces.td"
+
 include "Dialect/NorthStarAttrs.td"
+include "Interfaces/FusionRegionInterfaces.td"
 
 class NorthStar_Op<string mnemonic, list<Trait> traits = []>
     : Op<NorthStar_Dialect, mnemonic, traits> {
@@ -10,7 +18,7 @@ class NorthStar_Op<string mnemonic, list<Trait> traits = []>
   let description = "$_name op";
 }
 
-class NorthStar_UnaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
+class NorthStar_UnaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [Pure], dag attributes = (ins)>:
     NorthStar_Op<mnemonic, [DeclareOpInterfaceMethods<DistributeParallelOp>] # traits>{
     let arguments = !con((ins
         OperandType:$input),
@@ -21,7 +29,7 @@ class NorthStar_UnaryOp<string mnemonic,Type OperandType, Type resultType = Oper
         resultType:$result);
 }
 
-class NorthStar_BinaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
+class NorthStar_BinaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [Pure], dag attributes = (ins)>:
     NorthStar_Op<mnemonic, [DeclareOpInterfaceMethods<DistributeParallelOp>] # traits>{
     let arguments = !con((ins
         OperandType:$lhs,
@@ -39,14 +47,14 @@ class NorthStar_ElewiseUnaryOp<string mnemonic,Type OperandType, Type resultType
 class NorthStar_ElewiseBinaryOp<string mnemonic,Type OperandType, Type resultType = OperandType,list<Trait> traits = [], dag attributes = (ins)>:
     NorthStar_BinaryOp<mnemonic, OperandType, resultType, [DeclareOpInterfaceMethods<SupportedDataParallelismOp>] # traits,attributes>;
 
-def NorthStar_ConstOp : NorthStar_Op<"const",[]>{
+def NorthStar_ConstOp : NorthStar_Op<"const",[Pure]>{
     let arguments = (ins
         ElementsAttr:$value);
     let results = (outs
         AnyNSTensor:$result);
 }
 
-def NorthStar_SoftmaxOp : NorthStar_UnaryOp<"softmax",AnyNSTensor, AnyNSTensor, [DeclareOpInterfaceMethods<SupportedDataParallelismOp,["applyDataParallelism","supportedDataParallelism"]>], (ins I64Attr:$axis)>{
+def NorthStar_SoftmaxOp : NorthStar_UnaryOp<"softmax",AnyNSTensor, AnyNSTensor, [DeclareOpInterfaceMethods<SupportedDataParallelismOp,["applyDataParallelism","supportedDataParallelism"]>,Pure], (ins I64Attr:$axis)>{
     let hasVerifier = 1;
     let builders = [
         OpBuilder<(ins "::mlir::Value":$input, "int64_t":$axis) ,
@@ -81,7 +89,7 @@ def NorthStar_AllToAllOp : NorthStar_Op<"all_to_all",[]>{
     );
 }
 
-def NorthStar_BufferCastOp : NorthStar_Op<"buffer_cast",[]>{
+def NorthStar_BufferCastOp : NorthStar_Op<"buffer_cast",[Pure]>{
     let description = "对数据切分的标记";
     let arguments = (ins
         Variadic<NSTensorOrBuffer>:$inputs,
@@ -92,7 +100,7 @@ def NorthStar_BufferCastOp : NorthStar_Op<"buffer_cast",[]>{
     let hasVerifier = 1;
 }
 
-def NorthStar_BufferOp : NorthStar_Op<"buffer",[]>{
+def NorthStar_BufferOp : NorthStar_Op<"buffer",[Pure]>{
     let description = "将 多个device_id 的tensor 组合成 一个 buffer";
     let arguments = (ins
         Variadic<AnyNSTensor>:$tensors
@@ -115,7 +123,7 @@ def NorthStar_BufferOp : NorthStar_Op<"buffer",[]>{
     ];
 }
 
-def NorthStar_GetTensorOp: NorthStar_Op<"get_tensor",[]>{
+def NorthStar_GetTensorOp: NorthStar_Op<"get_tensor",[Pure]>{
     let description = "从buffer中取出指定device_id的tensor";
     let arguments = (ins
         AnyBuffer:$buffer,
@@ -130,6 +138,35 @@ def NorthStar_PrintOp: NorthStar_Op<"print",[]>{
     let arguments = (ins
         AnyType:$input
     );
+}
+
+def NorthStar_DeviceKernelOp: NorthStar_Op<"device_region",[
+        DeclareOpInterfaceMethods<FusionRegionOpInterface,["FusionOps"]>,AffineScope, AutomaticAllocationScope,IsolatedFromAbove, OpAsmOpInterface]>{
+    let arguments = (ins
+        SymbolNameAttr:$sym_name,
+        I64Attr:$device_id,
+        Variadic<AnyType>:$args
+    );
+
+    let regions = (region SizedRegion<1>:$region);
+
+    let results = (outs
+        Variadic<AnyType>:$result);
+
+    let hasVerifier = 1;
+}
+
+def NorthStar_ReturnOp : NorthStar_Op<"return", [Pure, HasParent<"DeviceKernelOp">, ReturnLike, Terminator]> {
+  let summary = "return operation";
+
+  let arguments = (ins Variadic<AnyType>:$operands);
+
+  let builders = [OpBuilder<(ins), [{
+    build($_builder, $_state, std::nullopt);
+  }]>];
+
+  let assemblyFormat = "attr-dict ($operands^ `:` type($operands))?";
+  let hasVerifier = 0;
 }
 
 #endif // INCLUDE_LLCOMPILER_DIALECT_NorthStar_IR_LLHOPS_TD_
