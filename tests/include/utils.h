@@ -8,7 +8,7 @@
 #include <chrono>
 
 struct TestBase {
-  virtual void run_test() = 0;
+  virtual void run_test(int argc, char **argv) = 0;
 };
 
 struct TestEntry {
@@ -21,12 +21,12 @@ struct TestEntry {
     return cases_.size();
   }
 
-  void apply() {
+  void apply(int argc, char **argv) {
     size_t idx = 0;
     for (const auto& test_case : cases_) {
       std::cout << "-------------------------- run test " << ++idx << " : " << test_case.first << "--------------------------" << std::endl;
       auto start = std::chrono::high_resolution_clock::now();
-      test_case.second->run_test();
+      test_case.second->run_test(argc, argv);
       auto end = std::chrono::high_resolution_clock::now();
       auto elapsed_ms = std::chrono::duration<double, std::milli>(end - start).count();
       std::cout << "-------------------------- test : "<< test_case.first << " done : " << elapsed_ms << " ms --------------------------" << std::endl;
@@ -41,7 +41,7 @@ inline thread_local TestEntry entry;
 
 #define TEST(name)                                                \
 struct Case##name : public TestBase {                             \
-  void run_test() override;                                       \
+  void run_test(int argc, char **argv) override;                  \
 };                                                                \
 static auto i_##name = entry.register_case<Case##name>(#name);    \
-void Case##name::run_test()
+void Case##name::run_test(int argc, char **argv)

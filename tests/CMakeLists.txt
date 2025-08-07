@@ -5,14 +5,29 @@ file(GLOB_RECURSE MAPSC_TEST_SRCS
 
 set(TEST_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
+get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
+get_property(extension_libs GLOBAL PROPERTY MLIR_EXTENSION_LIBS)
+
 set(LIBRARIES
-  MLIRIR
-  MLIRTensorDialect
-  MLIRFuncDialect
-  MLIRSCFDialect
-  MLIRLinalgDialect
+  ${dialect_libs}
+  ${conversion_libs}
+  ${extension_libs}
+
+  MLIRAffineAnalysis
+  MLIRAnalysis
+  MLIRCastInterfaces
+  MLIRDialect
+  MLIROptLib
   MLIRParser
   MLIRPass
+  MLIRTransforms
+  MLIRTransformUtils
+  MLIRSupport
+  MLIRIR
+  MLIRToLLVMIRTranslationRegistration
+  MLIRCAPIDebug
+
 )
 
 foreach(TEST_CASE ${MAPSC_TEST_SRCS})

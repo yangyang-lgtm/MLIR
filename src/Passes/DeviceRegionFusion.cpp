@@ -35,7 +35,7 @@ namespace mlir::north_star {
 using namespace ::mlir;
 using namespace ::mlir::north_star;
 
-namespace {
+namespace pattern {
 
 void FusionOps(::mlir::RewriterBase& rewriter,
                mlir::ArrayRef<::mlir::Operation*> ops, ::mlir::Location loc) {
@@ -161,19 +161,19 @@ struct BufferCastOpFold
     llvm::outs() << "match:" << getDebugName() << "\n";
   }
 };
-}  // namespace
+}  // namespace pattern
 
 void ::mlir::north_star::populateDeviceRegionFusionPatterns(
     RewritePatternSet& patterns) {
   auto context = patterns.getContext();
-  patterns.addWithLabel<BufferCastOpDeviceRegionFusion>(
+  patterns.addWithLabel<pattern::BufferCastOpDeviceRegionFusion>(
       StringRef("BufferCastOpDeviceRegionFusion"), context, 100);
 };
 
 void ::mlir::north_star::populateBufferCastOpCanonicalizationPatterns(
     RewritePatternSet& patterns) {
   auto context = patterns.getContext();
-  patterns.addWithLabel<BufferCastOpFold>(StringRef("BufferCastOpFold"),
+  patterns.addWithLabel<pattern::BufferCastOpFold>(StringRef("BufferCastOpFold"),
                                           context, 2);
 }
 

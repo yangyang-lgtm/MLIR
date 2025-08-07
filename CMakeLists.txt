@@ -51,7 +51,7 @@ set(LINK_LIBRARIES_DIRS
 include_directories(${INCLUDE_DIRS})
 link_directories(${LINK_LIBRARIES_DIRS})
 
-# sub dir
+# src dir
 add_subdirectory(src)
 
 # add library
@@ -78,6 +78,7 @@ add_custom_command(
   COMMENT "Deleting empty.cpp"
 )
 
+# test dir
 if(BUILD_TESTS)
   add_subdirectory(tests)
 endif()

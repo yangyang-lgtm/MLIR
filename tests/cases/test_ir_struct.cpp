@@ -31,6 +31,8 @@
 
 #include "Utils/File.h"
 
+#include "Dialect/NorthStarDialect.h"
+
 TEST(IrStruct) {
   const char* ir =
       R"(func.func @insertion_point_outside_loop(%t : tensor<?xf32>, %sz : index,
@@ -39,7 +41,7 @@ TEST(IrStruct) {
   %c1 = arith.constant 1 : index
   %c5 = arith.constant 5 : index
   %blank = tensor.empty() : tensor<5xf32>
-
+  // test ...
   %r = scf.for %iv = %c0 to %sz step %c5 iter_args(%bb = %t) -> (tensor<?xf32>) {
     %iv_i32 = arith.index_cast %iv : index to i32
     %f = arith.sitofp %iv_i32 : i32 to f32
