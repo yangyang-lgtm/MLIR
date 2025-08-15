@@ -68,6 +68,7 @@ target_link_libraries(${MAIN_LIB_NAME} PRIVATE
   "-Wl,--whole-archive"
   MLIRNorthStarDialect
   MLIRNorthStarPasses
+  MLIRNorthStarToLinalg
   "-Wl,--no-whole-archive"
 )
 

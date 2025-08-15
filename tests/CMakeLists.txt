@@ -37,8 +37,3 @@ foreach(TEST_CASE ${MAPSC_TEST_SRCS})
   target_link_directories(${CASE_NAME} PRIVATE ${LINK_LIBRARIES_DIRS})
   target_link_libraries(${CASE_NAME} PRIVATE ${MAIN_LIB_NAME} ${LIBRARIES})
 endforeach()
-
-add_executable(test_all ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${MAPSC_TEST_SRCS})
-target_include_directories(test_all PUBLIC ${INCLUDE_DIRS} ${TEST_INCLUDE})
-target_link_directories(test_all PRIVATE ${LINK_LIBRARIES_DIRS})
-target_link_libraries(test_all PRIVATE ${MAIN_LIB_NAME} ${LIBRARIES})

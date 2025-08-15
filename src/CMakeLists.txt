@@ -61,6 +61,7 @@ macro(FOR_EACH_PASS_GEN TD_FILES CUR_HEADER)
   endforeach()
 endmacro()
 
+add_subdirectory(Conversion)
 add_subdirectory(Dialect)
 add_subdirectory(Interfaces)
 add_subdirectory(Passes)

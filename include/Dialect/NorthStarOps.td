@@ -141,7 +141,7 @@ def NorthStar_PrintOp: NorthStar_Op<"print",[]>{
 }
 
 def NorthStar_DeviceKernelOp: NorthStar_Op<"device_region",[
-        DeclareOpInterfaceMethods<FusionRegionOpInterface,["FusionOps"]>,AffineScope, AutomaticAllocationScope,IsolatedFromAbove, OpAsmOpInterface]>{
+        DeclareOpInterfaceMethods<FusionRegionOpInterface,["FusionOps"]>,AffineScope, AutomaticAllocationScope,IsolatedFromAbove, OpAsmOpInterface]# GraphRegionNoTerminator.traits>{
     let arguments = (ins
         SymbolNameAttr:$sym_name,
         I64Attr:$device_id,

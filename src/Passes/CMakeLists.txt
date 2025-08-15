@@ -22,5 +22,5 @@ add_mlir_library(MLIRNorthStarPasses
   MLIRNorthStarDialect
   MLIRPass
   MLIRTransforms
-  MLIRTransformUtils
+  MLIRTutorialUtils
 )
