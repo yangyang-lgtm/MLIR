@@ -101,5 +101,16 @@ set(TRITON_LIBRARIES
   LLVMPasses
 )
 
+# custom
+set(CUSTOM_LIBS
+  MLIRCustomDialect
+)
+
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${TRITON_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE
+  ${TRITON_LIBRARIES}
+  # custom
+  "-Wl,--whole-archive"
+  ${CUSTOM_LIBS}
+  "-Wl,--no-whole-archive"
+)

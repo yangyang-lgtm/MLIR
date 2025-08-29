@@ -26,7 +26,7 @@ static void init_context(mlir::MLIRContext& context){
 
 int main (int argc, char** argv) {
   if (argc != 2) {
-    std::cout << "run as : ./" << argv[0] << " xxx.mlir" << std::endl;
+    std::cout << "run as : ." << argv[0] << " xxx.mlir" << std::endl;
     return 0;
   }
 
