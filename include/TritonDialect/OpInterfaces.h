@@ -19,6 +19,6 @@ LogicalResult verifyDotOpInterface(Operation *op);
 } // namespace triton
 } // namespace mlir
 
-#include "Dialect/OpInterfaces.h.inc"
+#include "TritonDialect/OpInterfaces.h.inc"
 
 #endif // TRITON_IR_OP_INTERFACES_H_

@@ -63,7 +63,7 @@ void TritonDialect::initialize() {
 
   addOperations<
 #define GET_OP_LIST
-#include "Dialect/Ops.cpp.inc"
+#include "TritonDialect/Ops.cpp.inc"
       >();
 
   // We can also add interface here.

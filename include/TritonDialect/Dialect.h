@@ -19,7 +19,7 @@
 #include "TritonDialect/Types.h"
 
 #define GET_OP_CLASSES
-#include "Dialect/Ops.h.inc"
+#include "TritonDialect/Ops.h.inc"
 
 namespace mlir {
 namespace triton {
