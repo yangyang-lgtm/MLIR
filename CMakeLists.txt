@@ -1,11 +1,8 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
-project(NorthStar CXX)
+project(triton-to-custom CXX C)
 
-set(MAIN_LIB_NAME ${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-option(BUILD_TESTS "Build gtest shared object and north-star cpp tests" ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/shared)
@@ -23,6 +20,36 @@ endif()
 
 message(STATUS "LLVM_CMAKE_DIR: ${LLVM_CMAKE_DIR}")
 message(STATUS "MLIR_CMAKE_DIR: ${MLIR_CMAKE_DIR}")
+
+function(add_triton_object name)
+  cmake_parse_arguments(ARG "" "" "DEPENDS;LINK_LIBS" ${ARGN})
+  add_library(${name} OBJECT)
+  target_sources(${name}
+          PRIVATE ${ARG_UNPARSED_ARGUMENTS}
+          INTERFACE $<TARGET_OBJECTS:${name}>
+  )
+
+  # add_library(${name} OBJECT ${ARG_UNPARSED_ARGUMENTS})
+  if(ARG_DEPENDS)
+    add_dependencies(${name} ${ARG_DEPENDS})
+  endif()
+  if(ARG_LINK_LIBS)
+    target_link_libraries(${name} PUBLIC ${ARG_LINK_LIBS})
+  endif()
+endfunction(add_triton_object)
+
+set_property(GLOBAL PROPERTY TRITON_LIBS "")
+function(add_triton_library name)
+  set_property(GLOBAL APPEND PROPERTY TRITON_LIBS ${name})
+  add_triton_object(${name} ${ARGN})
+  llvm_update_compile_flags(${name})
+endfunction()
+
+set_property(GLOBAL PROPERTY TRITON_PLUGINS "")
+function(add_triton_plugin name)
+  set_property(GLOBAL APPEND PROPERTY TRITON_PLUGINS ${name})
+  add_triton_object(${name} ${ARGN})
+endfunction()
 
 list(APPEND CMAKE_MODULE_PATH ${MLIR_CMAKE_DIR})
 list(APPEND CMAKE_MODULE_PATH ${LLVM_CMAKE_DIR})
@@ -43,7 +70,7 @@ endif()
 
 set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/src)
+    ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
 set(LINK_LIBRARIES_DIRS
     ${PROJECT_BINARY_DIR}/shared)
@@ -51,35 +78,40 @@ set(LINK_LIBRARIES_DIRS
 include_directories(${INCLUDE_DIRS})
 link_directories(${LINK_LIBRARIES_DIRS})
 
-# src dir
-add_subdirectory(src)
+add_subdirectory(lib)
 
-# add library
-set(EMPTY_FILE ${CMAKE_CURRENT_BINARY_DIR}/empty.cpp)
-add_custom_command(
-  OUTPUT ${EMPTY_FILE}
-  PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E touch ${EMPTY_FILE}
-  COMMENT "Creating temporary empty.cpp..."
+get_property(triton_libs GLOBAL PROPERTY TRITON_LIBS)
+get_property(triton_plugins GLOBAL PROPERTY TRITON_PLUGINS)
+set(TRITON_LIBRARIES
+  ${triton_libs}
+  ${triton_plugins}
+
+  # mlir
+  MLIRIR
+  MLIRControlFlowToLLVM
+  MLIRPass
+  MLIRTransforms
+  MLIRSupport
+  MLIRTargetLLVMIRExport
+  MLIRMathToLLVM
+  MLIRSCFToControlFlow
+  MLIRIndexToLLVM
+
+  # LLVM
+  LLVMPasses
 )
 
-add_library(${MAIN_LIB_NAME} SHARED ${EMPTY_FILE})
-target_link_libraries(${MAIN_LIB_NAME} PRIVATE
+# custom
+set(CUSTOM_LIBS
+  CustomIR
+  TritonToEmitC
+)
+
+add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+  ${TRITON_LIBRARIES}
+  # custom
   "-Wl,--whole-archive"
-  MLIRNorthStarDialect
-  MLIRNorthStarPasses
-  MLIRNorthStarToLinalg
+  ${CUSTOM_LIBS}
   "-Wl,--no-whole-archive"
 )
-
-add_custom_command(
-  TARGET ${MAIN_LIB_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E remove ${EMPTY_FILE}
-  COMMENT "Deleting empty.cpp"
-)
-
-# test dir
-if(BUILD_TESTS)
-  add_subdirectory(tests)
-endif()
