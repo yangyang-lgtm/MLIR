@@ -70,6 +70,7 @@ endif()
 
 set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_BINARY_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}/src)
 
 set(LINK_LIBRARIES_DIRS
@@ -78,6 +79,7 @@ set(LINK_LIBRARIES_DIRS
 include_directories(${INCLUDE_DIRS})
 link_directories(${LINK_LIBRARIES_DIRS})
 
+add_subdirectory(include/CustomDialect)
 add_subdirectory(src)
 
 get_property(triton_libs GLOBAL PROPERTY TRITON_LIBS)
@@ -103,7 +105,8 @@ set(TRITON_LIBRARIES
 
 # custom
 set(CUSTOM_LIBS
-  MLIRCustomDialect
+  CustomDialect
+  ConvertToCustom
 )
 
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)

@@ -7,7 +7,12 @@
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+
+#include "CustomDialect/Custom.h"
 #include "TritonDialect/Dialect.h"
+
+#include "Conversion/TritonToCustomPass.h"
+#include "Conversion/ArithToCustomPass.h"
 
 #include "utils.h"
 
@@ -22,7 +27,8 @@ static void init_context(mlir::MLIRContext& context){
     mlir::func::FuncDialect,
     mlir::scf::SCFDialect,
     mlir::triton::TritonDialect,
-    mlir::arith::ArithDialect
+    mlir::arith::ArithDialect,
+    mlir::custom::CustomDialect
   >(context);
 }
 
@@ -41,6 +47,8 @@ int main (int argc, char** argv) {
   }
 
   mlir::PassManager manager(&context);
+  manager.addPass(mlir::custom::createConvertTritonToCustom());
+  manager.addPass(mlir::custom::createConvertArithToCustom());
 
   if (manager.run(*module).failed()){
     llvm::outs() << " run pass failed\n";
