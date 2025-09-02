@@ -7,7 +7,11 @@
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/EmitC/IR/EmitC.h"
 #include "TritonDialect/Dialect.h"
+#include "CustomDialect/CustomDialect.h"
+#include "Conversion/TritonToEmitCPass.h"
+#include "Conversion/ArithToEmitCPass.h"
 
 #include "utils.h"
 
@@ -21,7 +25,11 @@ static void init_context(mlir::MLIRContext& context){
   add_dialects<
     mlir::func::FuncDialect,
     mlir::scf::SCFDialect,
-    mlir::triton::TritonDialect>(context);
+    mlir::triton::TritonDialect,
+    mlir::emitc::EmitCDialect,
+    mlir::arith::ArithDialect,
+    mlir::custom::EmitCExtDialect
+  >(context);
 }
 
 int main (int argc, char** argv) {
@@ -39,6 +47,10 @@ int main (int argc, char** argv) {
   }
 
   mlir::PassManager manager(&context);
+
+  manager.addPass(mlir::custom::createConvertTritonToEmitC());
+  manager.addPass(mlir::custom::createConvertArithToEmitC());
+
   if (manager.run(*module).failed()){
     llvm::outs() << " run pass failed\n";
     return 0;

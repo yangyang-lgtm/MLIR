@@ -103,7 +103,8 @@ set(TRITON_LIBRARIES
 
 # custom
 set(CUSTOM_LIBS
-  MLIRCustomDialect
+  CustomIR
+  TritonToEmitC
 )
 
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)

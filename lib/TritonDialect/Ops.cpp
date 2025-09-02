@@ -1364,7 +1364,7 @@ LogicalResult DescriptorStoreOp::verify() {
                                        getSrc().getType());
 }
 
-  LogicalResult LoadexOp::verify() {
+LogicalResult LoadexOp::verify() {
   auto ptrType = getPtr().getType();
   if (!isa<PointerType>(ptrType)) {
     return emitOpError("ptr must be a tensor of pointers");
@@ -1372,7 +1372,7 @@ LogicalResult DescriptorStoreOp::verify() {
   return success();
 }
 
-  void LoadexOp::build(OpBuilder &builder, OperationState &state,
+void LoadexOp::build(OpBuilder &builder, OperationState &state,
                      Value ptr, int tensor_size, Value valid_size) {
   SmallVector<Type> inferredReturnTypes;
   auto dst_tensor_dtype = cast<PointerType>(ptr.getType()).getPointeeType();
@@ -1380,7 +1380,7 @@ LogicalResult DescriptorStoreOp::verify() {
   LoadexOp::build(builder, state, inferredReturnTypes, ptr, tensor_size, valid_size);
 }
 
-  LogicalResult LoadexOp::inferReturnTypes(
+LogicalResult LoadexOp::inferReturnTypes(
       MLIRContext *context, std::optional<Location> location, ValueRange operands,
       DictionaryAttr attributes, OpaqueProperties properties, RegionRange regions,
       SmallVectorImpl<Type> &inferredReturnTypes) {
