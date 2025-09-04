@@ -48,16 +48,16 @@ def Custom_FileOp
   let description = [{
     A `file` represents a single C/C++ file.
 
-    `mlir-translate` ignores the body of all `Custom.file` ops
-    unless the `-file-id=id` flag is used. With that flag, all `Custom.file` ops
+    `mlir-translate` ignores the body of all `custom.file` ops
+    unless the `-file-id=id` flag is used. With that flag, all `custom.file` ops
     with matching id are emitted.
 
     Example:
 
     ```mlir
-    Custom.file "main" {
-      Custom.func @func_one() {
-        Custom.return
+    custom.file "main" {
+      custom.func @func_one() {
+        custom.return
       }
     }
     ```
@@ -76,9 +76,9 @@ def Custom_FileOp
     // OpAsmOpInterface Methods
     //===------------------------------------------------------------------===//
 
-    /// Custom ops in the body can omit their 'Custom.' prefix in the assembly.
+    /// Custom ops in the body can omit their 'custom.' prefix in the assembly.
     static ::llvm::StringRef getDefaultDialect() {
-      return "Custom";
+      return "custom";
     }
   }];
 
@@ -90,15 +90,15 @@ def Custom_FileOp
 def Custom_AddOp : Custom_BinaryOp<"add", [CExpression]> {
   let summary = "Addition operation";
   let description = [{
-    With the `Custom.add` operation the arithmetic operator + (addition) can
+    With the `custom.add` operation the arithmetic operator + (addition) can
     be applied.
 
     Example:
 
     ```mlir
     // Custom form of the addition operation.
-    %0 = Custom.add %arg0, %arg1 : (i32, i32) -> i32
-    %1 = Custom.add %arg2, %arg3 : (!Custom.ptr<f32>, i32) -> !Custom.ptr<f32>
+    %0 = custom.add %arg0, %arg1 : (i32, i32) -> i32
+    %1 = custom.add %arg2, %arg3 : (!custom.ptr<f32>, i32) -> !custom.ptr<f32>
     ```
     ```c++
     // Code emitted for the operations above.
@@ -113,18 +113,18 @@ def Custom_AddOp : Custom_BinaryOp<"add", [CExpression]> {
 def Custom_ApplyOp : Custom_Op<"apply", [CExpression]> {
   let summary = "Apply operation";
   let description = [{
-    With the `Custom.apply` operation the operators & (address of) and * (contents of)
+    With the `custom.apply` operation the operators & (address of) and * (contents of)
     can be applied to a single operand.
 
     Example:
 
     ```mlir
     // Custom form of applying the & operator.
-    %0 = Custom.apply "&"(%arg0) : (!Custom.lvalue<i32>) -> !Custom.ptr<i32>
+    %0 = custom.apply "&"(%arg0) : (!custom.lvalue<i32>) -> !custom.ptr<i32>
 
     // Generic form of the same operation.
-    %0 = "Custom.apply"(%arg0) {applicableOperator = "&"}
-        : (!Custom.lvalue<i32>) -> !Custom.ptr<i32>
+    %0 = "custom.apply"(%arg0) {applicableOperator = "&"}
+        : (!custom.lvalue<i32>) -> !custom.ptr<i32>
 
     ```
   }];
@@ -142,13 +142,13 @@ def Custom_ApplyOp : Custom_Op<"apply", [CExpression]> {
 def Custom_BitwiseAndOp : Custom_BinaryOp<"bitwise_and", [CExpression]> {
   let summary = "Bitwise and operation";
   let description = [{
-    With the `Custom.bitwise_and` operation the bitwise operator & (and) can
+    With the `custom.bitwise_and` operation the bitwise operator & (and) can
     be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.bitwise_and %arg0, %arg1 : (i32, i32) -> i32
+    %0 = custom.bitwise_and %arg0, %arg1 : (i32, i32) -> i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -161,13 +161,13 @@ def Custom_BitwiseLeftShiftOp : Custom_BinaryOp<"bitwise_left_shift",
     [CExpression]> {
   let summary = "Bitwise left shift operation";
   let description = [{
-    With the `Custom.bitwise_left_shift` operation the bitwise operator <<
+    With the `custom.bitwise_left_shift` operation the bitwise operator <<
     (left shift) can be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.bitwise_left_shift %arg0, %arg1 : (i32, i32) -> i32
+    %0 = custom.bitwise_left_shift %arg0, %arg1 : (i32, i32) -> i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -179,13 +179,13 @@ def Custom_BitwiseLeftShiftOp : Custom_BinaryOp<"bitwise_left_shift",
 def Custom_BitwiseNotOp : Custom_UnaryOp<"bitwise_not", [CExpression]> {
   let summary = "Bitwise not operation";
   let description = [{
-    With the `Custom.bitwise_not` operation the bitwise operator ~ (not) can
+    With the `custom.bitwise_not` operation the bitwise operator ~ (not) can
     be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.bitwise_not %arg0 : (i32) -> i32
+    %0 = custom.bitwise_not %arg0 : (i32) -> i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -197,13 +197,13 @@ def Custom_BitwiseNotOp : Custom_UnaryOp<"bitwise_not", [CExpression]> {
 def Custom_BitwiseOrOp : Custom_BinaryOp<"bitwise_or", [CExpression]> {
   let summary = "Bitwise or operation";
   let description = [{
-    With the `Custom.bitwise_or` operation the bitwise operator | (or)
+    With the `custom.bitwise_or` operation the bitwise operator | (or)
     can be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.bitwise_or %arg0, %arg1 : (i32, i32) -> i32
+    %0 = custom.bitwise_or %arg0, %arg1 : (i32, i32) -> i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -216,13 +216,13 @@ def Custom_BitwiseRightShiftOp : Custom_BinaryOp<"bitwise_right_shift",
     [CExpression]> {
   let summary = "Bitwise right shift operation";
   let description = [{
-    With the `Custom.bitwise_right_shift` operation the bitwise operator >>
+    With the `custom.bitwise_right_shift` operation the bitwise operator >>
     (right shift) can be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.bitwise_right_shift %arg0, %arg1 : (i32, i32) -> i32
+    %0 = custom.bitwise_right_shift %arg0, %arg1 : (i32, i32) -> i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -234,13 +234,13 @@ def Custom_BitwiseRightShiftOp : Custom_BinaryOp<"bitwise_right_shift",
 def Custom_BitwiseXorOp : Custom_BinaryOp<"bitwise_xor", [CExpression]> {
   let summary = "Bitwise xor operation";
   let description = [{
-    With the `Custom.bitwise_xor` operation the bitwise operator ^ (xor)
+    With the `custom.bitwise_xor` operation the bitwise operator ^ (xor)
     can be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.bitwise_xor %arg0, %arg1 : (i32, i32) -> i32
+    %0 = custom.bitwise_xor %arg0, %arg1 : (i32, i32) -> i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -252,7 +252,7 @@ def Custom_BitwiseXorOp : Custom_BinaryOp<"bitwise_xor", [CExpression]> {
 def Custom_CallOpaqueOp : Custom_Op<"call_opaque", [CExpression]> {
   let summary = "Opaque call operation";
   let description = [{
-    The `Custom.call_opaque` operation represents a C++ function call. The callee
+    The `custom.call_opaque` operation represents a C++ function call. The callee
     can be an arbitrary non-empty string. The call allows specifying order
     of operands and attributes in the call as follows:
 
@@ -263,10 +263,10 @@ def Custom_CallOpaqueOp : Custom_Op<"call_opaque", [CExpression]> {
 
     ```mlir
     // Custom form defining a call to `foo()`.
-    %0 = Custom.call_opaque "foo" () : () -> i32
+    %0 = custom.call_opaque "foo" () : () -> i32
 
     // Generic form of the same operation.
-    %0 = "Custom.call_opaque"() {callee = "foo"} : () -> i32
+    %0 = "custom.call_opaque"() {callee = "foo"} : () -> i32
     ```
   }];
   let arguments = (ins
@@ -300,7 +300,7 @@ def Custom_CastOp : Custom_Op<"cast",
      DeclareOpInterfaceMethods<CastOpInterface>]> {
   let summary = "Cast operation";
   let description = [{
-    The `Custom.cast` operation performs an explicit type conversion and is emitted
+    The `custom.cast` operation performs an explicit type conversion and is emitted
     as a C-style cast expression. It can be applied to integer, float, index
     and Custom types.
 
@@ -308,11 +308,11 @@ def Custom_CastOp : Custom_Op<"cast",
 
     ```mlir
     // Cast from `int32_t` to `float`
-    %0 = Custom.cast %arg0: i32 to f32
+    %0 = custom.cast %arg0: i32 to f32
 
     // Cast from `void` to `int32_t` pointer
-    %1 = Custom.cast %arg1 :
-        !Custom.ptr<!Custom.opaque<"void">> to !Custom.ptr<i32>
+    %1 = custom.cast %arg1 :
+        !custom.ptr<!custom.opaque<"void">> to !custom.ptr<i32>
     ```
   }];
 
@@ -324,7 +324,7 @@ def Custom_CastOp : Custom_Op<"cast",
 def Custom_CmpOp : Custom_BinaryOp<"cmp", [CExpression]> {
   let summary = "Comparison operation";
   let description = [{
-    With the `Custom.cmp` operation the comparison operators ==, !=, <, <=, >, >=, <=> 
+    With the `custom.cmp` operation the comparison operators ==, !=, <, <=, >, >=, <=>
     can be applied.
 
     Its first argument is an attribute that defines the comparison operator:
@@ -340,12 +340,12 @@ def Custom_CmpOp : Custom_BinaryOp<"cmp", [CExpression]> {
     Example:
     ```mlir
     // Custom form of the cmp operation.
-    %0 = Custom.cmp eq, %arg0, %arg1 : (i32, i32) -> i1
-    %1 = Custom.cmp lt, %arg2, %arg3 : 
+    %0 = custom.cmp eq, %arg0, %arg1 : (i32, i32) -> i1
+    %1 = custom.cmp lt, %arg2, %arg3 :
         (
-          !Custom.opaque<"std::valarray<float>">,
-          !Custom.opaque<"std::valarray<float>">
-        ) -> !Custom.opaque<"std::valarray<bool>">
+          !custom.opaque<"std::valarray<float>">,
+          !custom.opaque<"std::valarray<float>">
+        ) -> !custom.opaque<"std::valarray<bool>">
     ```
     ```c++
     // Code emitted for the operations above.
@@ -365,10 +365,10 @@ def Custom_CmpOp : Custom_BinaryOp<"cmp", [CExpression]> {
 def Custom_ConstantOp : Custom_Op<"constant", [ConstantLike]> {
   let summary = "Constant operation";
   let description = [{
-    The `Custom.constant` operation produces an SSA value equal to some constant
+    The `custom.constant` operation produces an SSA value equal to some constant
     specified by an attribute. This can be used to form simple integer and
     floating point constants, as well as more exotic things like tensor
-    constants. The `Custom.constant` operation also supports the Custom opaque
+    constants. The `custom.constant` operation also supports the Custom opaque
     attribute and the Custom opaque type. Since folding is supported,
     it should not be used with pointers.
 
@@ -376,11 +376,11 @@ def Custom_ConstantOp : Custom_Op<"constant", [ConstantLike]> {
 
     ```mlir
     // Integer constant
-    %0 = "Custom.constant"(){value = 42 : i32} : () -> i32
+    %0 = "custom.constant"(){value = 42 : i32} : () -> i32
 
     // Constant emitted as `char = CHAR_MIN;`
-    %1 = "Custom.constant"() {value = #Custom.opaque<"CHAR_MIN">}
-      : () -> !Custom.opaque<"char">
+    %1 = "custom.constant"() {value = #custom.opaque<"CHAR_MIN">}
+      : () -> !custom.opaque<"char">
     ```
   }];
 
@@ -394,15 +394,15 @@ def Custom_ConstantOp : Custom_Op<"constant", [ConstantLike]> {
 def Custom_DivOp : Custom_BinaryOp<"div", [CExpression]> {
   let summary = "Division operation";
   let description = [{
-    With the `Custom.div` operation the arithmetic operator / (division) can
+    With the `custom.div` operation the arithmetic operator / (division) can
     be applied.
 
     Example:
 
     ```mlir
     // Custom form of the division operation.
-    %0 = Custom.div %arg0, %arg1 : (i32, i32) -> i32
-    %1 = Custom.div %arg2, %arg3 : (f32, f32) -> f32
+    %0 = custom.div %arg0, %arg1 : (i32, i32) -> i32
+    %1 = custom.div %arg2, %arg3 : (f32, f32) -> f32
     ```
     ```c++
     // Code emitted for the operations above.
@@ -420,22 +420,22 @@ def Custom_ExpressionOp : Custom_Op<"expression",
        SingleBlockImplicitTerminator<"custom::YieldOp">, NoRegionArguments]> {
   let summary = "Expression operation";
   let description = [{
-    The `Custom.expression` operation returns a single SSA value which is yielded by
+    The `custom.expression` operation returns a single SSA value which is yielded by
     its single-basic-block region. The operation doesn't take any arguments.
 
     As the operation is to be emitted as a C expression, the operations within
     its body must form a single Def-Use tree of Custom ops whose result is
-    yielded by a terminating `Custom.yield`.
+    yielded by a terminating `custom.yield`.
 
     Example:
 
     ```mlir
-    %r = Custom.expression : i32 {
-      %0 = Custom.add %a, %b : (i32, i32) -> i32
-      %1 = Custom.call_opaque "foo"(%0) : (i32) -> i32
-      %2 = Custom.add %c, %d : (i32, i32) -> i32
-      %3 = Custom.mul %1, %2 : (i32, i32) -> i32
-      Custom.yield %3 : i32
+    %r = custom.expression : i32 {
+      %0 = custom.add %a, %b : (i32, i32) -> i32
+      %1 = custom.call_opaque "foo"(%0) : (i32) -> i32
+      %2 = custom.add %c, %d : (i32, i32) -> i32
+      %3 = custom.mul %1, %2 : (i32, i32) -> i32
+      custom.yield %3 : i32
     }
     ```
 
@@ -485,9 +485,9 @@ def Custom_ExpressionOp : Custom_Op<"expression",
     // OpAsmOpInterface Methods
     //===------------------------------------------------------------------===//
 
-    /// Custom ops in the body can omit their 'Custom.' prefix in the assembly.
+    /// Custom ops in the body can omit their 'custom.' prefix in the assembly.
     static ::llvm::StringRef getDefaultDialect() {
-      return "Custom";
+      return "custom";
     }
   }];
 }
@@ -498,7 +498,7 @@ def Custom_ForOp : Custom_Op<"for",
        RecursiveMemoryEffects]> {
   let summary = "For operation";
   let description = [{
-    The `Custom.for` operation represents a C loop of the following form:
+    The `custom.for` operation represents a C loop of the following form:
 
     ```c++
     for (T i = lb; i < ub; i += step) { /* ... */ } // where T is typeof(lb)
@@ -511,18 +511,18 @@ def Custom_ForOp : Custom_Op<"for",
     signless integer, or an index. The step is a value of same type.
 
     This operation has no result. The body region must contain exactly one block
-    that terminates with `Custom.yield`. Calling ForOp::build will create such a
+    that terminates with `custom.yield`. Calling ForOp::build will create such a
     region and insert the terminator implicitly if none is defined, so will the
     parsing even in cases when it is absent from the custom format. For example:
 
     ```mlir
     // Index case.
-    Custom.for %iv = %lb to %ub step %step {
+    custom.for %iv = %lb to %ub step %step {
       ... // body
     }
     ...
     // Integer case.
-    Custom.for %iv_32 = %lb_32 to %ub_32 step %step_32 : i32 {
+    custom.for %iv_32 = %lb_32 to %ub_32 step %step_32 : i32 {
       ... // body
     }
     ```
@@ -551,9 +551,9 @@ def Custom_ForOp : Custom_Op<"for",
     // OpAsmOpInterface Methods
     //===------------------------------------------------------------------===//
 
-    /// Custom ops in the body can omit their 'Custom.' prefix in the assembly.
+    /// Custom ops in the body can omit their 'custom.' prefix in the assembly.
     static ::llvm::StringRef getDefaultDialect() {
-      return "Custom";
+      return "custom";
     }
   }];
 
@@ -567,7 +567,7 @@ def Custom_CallOp : Custom_Op<"call",
      DeclareOpInterfaceMethods<SymbolUserOpInterface>]> {
   let summary = "Call operation";
   let description = [{
-    The `Custom.call` operation represents a direct call to an `Custom.func`
+    The `custom.call` operation represents a direct call to an `custom.func`
     that is within the same symbol scope as the call. The operands and result type
     of the call must match the specified function type. The callee is encoded as a
     symbol reference attribute named "callee".
@@ -575,7 +575,7 @@ def Custom_CallOp : Custom_Op<"call",
     Example:
 
     ```mlir
-    %2 = Custom.call @my_add(%0, %1) : (f32, f32) -> f32
+    %2 = custom.call @my_add(%0, %1) : (f32, f32) -> f32
     ```
   }];
   let arguments = (ins 
@@ -645,21 +645,21 @@ def Custom_DeclareFuncOp : Custom_Op<"declare_func", [
 ]> {
   let summary = "An operation to declare a function";
   let description = [{
-    The `Custom.declare_func` operation allows to insert a function declaration for an
-    `Custom.func` at a specific position. The operation only requires the "callee"
-    of the `Custom.func` to be specified as an attribute.
+    The `custom.declare_func` operation allows to insert a function declaration for an
+    `custom.func` at a specific position. The operation only requires the "callee"
+    of the `custom.func` to be specified as an attribute.
 
     Example:
 
     ```mlir
-    Custom.declare_func @bar
-    Custom.func @foo(%arg0: i32) -> i32 {
-      %0 = Custom.call @bar(%arg0) : (i32) -> (i32)
-      Custom.return %0 : i32
+    custom.declare_func @bar
+    custom.func @foo(%arg0: i32) -> i32 {
+      %0 = custom.call @bar(%arg0) : (i32) -> (i32)
+      custom.return %0 : i32
     }
 
-    Custom.func @bar(%arg0: i32) -> i32 {
-      Custom.return %arg0 : i32
+    custom.func @bar(%arg0: i32) -> i32 {
+      custom.return %arg0 : i32
     }
     ```
 
@@ -703,25 +703,25 @@ def Custom_FuncOp : Custom_Op<"func", [
 
     ```mlir
     // A function with no results:
-    Custom.func @foo(%arg0 : i32) {
-      Custom.call_opaque "bar" (%arg0) : (i32) -> ()
-      Custom.return
+    custom.func @foo(%arg0 : i32) {
+      custom.call_opaque "bar" (%arg0) : (i32) -> ()
+      custom.return
     }
 
     // A function with its argument as single result:
-    Custom.func @foo(%arg0 : i32) -> i32 {
-      Custom.return %arg0 : i32
+    custom.func @foo(%arg0 : i32) -> i32 {
+      custom.return %arg0 : i32
     }
 
     // A function with specifiers attribute:
-    Custom.func @example_specifiers_fn_attr() -> i32
+    custom.func @example_specifiers_fn_attr() -> i32
                 attributes {specifiers = ["static","inline"]} {
-      %0 = Custom.call_opaque "foo" (): () -> i32
-      Custom.return %0 : i32
+      %0 = custom.call_opaque "foo" (): () -> i32
+      custom.return %0 : i32
     }
 
     // An external function definition:
-    Custom.func private @extern_func(i32)
+    custom.func private @extern_func(i32)
                         attributes {specifiers = ["extern"]}
     ```
   }];
@@ -757,9 +757,9 @@ def Custom_FuncOp : Custom_Op<"func", [
     // OpAsmOpInterface Methods
     //===------------------------------------------------------------------===//
 
-    /// Custom ops in the body can omit their 'Custom.' prefix in the assembly.
+    /// Custom ops in the body can omit their 'custom.' prefix in the assembly.
     static ::llvm::StringRef getDefaultDialect() {
-      return "Custom";
+      return "custom";
     }
   }];
   let hasCustomAssemblyFormat = 1;
@@ -770,7 +770,7 @@ def Custom_ReturnOp : Custom_Op<"return", [Pure, HasParent<"FuncOp">,
                                 ReturnLike, Terminator]> {
   let summary = "Function return operation";
   let description = [{
-    The `Custom.return` operation represents a return operation within a function.
+    The `custom.return` operation represents a return operation within a function.
     The operation takes zero or exactly one operand and produces no results.
     The operand number and type must match the signature of the function
     that contains the operation.
@@ -778,9 +778,9 @@ def Custom_ReturnOp : Custom_Op<"return", [Pure, HasParent<"FuncOp">,
     Example:
 
     ```mlir
-    Custom.func @foo() -> (i32) {
+    custom.func @foo() -> (i32) {
       ...
-      Custom.return %0 : i32
+      custom.return %0 : i32
     }
     ```
   }];
@@ -794,23 +794,23 @@ def Custom_IncludeOp
     : Custom_Op<"include", []> {
   let summary = "Include operation";
   let description = [{
-    The `Custom.include` operation allows to define a source file inclusion via the
+    The `custom.include` operation allows to define a source file inclusion via the
     `#include` directive.
 
     Example:
 
     ```mlir
     // Custom form defining the inclusion of `<myheader>`.
-    Custom.include <"myheader.h">
+    custom.include <"myheader.h">
 
     // Generic form of the same operation.
-    "Custom.include" (){include = "myheader.h", is_standard_include} : () -> ()
+    "custom.include" (){include = "myheader.h", is_standard_include} : () -> ()
 
     // Custom form defining the inclusion of `"myheader"`.
-    Custom.include "myheader.h"
+    custom.include "myheader.h"
 
     // Generic form of the same operation.
-    "Custom.include" (){include = "myheader.h"} : () -> ()
+    "custom.include" (){include = "myheader.h"} : () -> ()
     ```
   }];
   let arguments = (ins
@@ -823,14 +823,14 @@ def Custom_IncludeOp
 def Custom_LiteralOp : Custom_Op<"literal", [Pure]> {
   let summary = "Literal operation";
   let description = [{
-    The `Custom.literal` operation produces an SSA value equal to some constant
+    The `custom.literal` operation produces an SSA value equal to some constant
     specified by an attribute.
 
     Example:
 
     ```mlir
-    %p0 = Custom.literal "M_PI" : f32
-    %1 = "Custom.add" (%arg0, %p0) : (f32, f32) -> f32
+    %p0 = custom.literal "M_PI" : f32
+    %1 = "custom.add" (%arg0, %p0) : (f32, f32) -> f32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -848,13 +848,13 @@ def Custom_LiteralOp : Custom_Op<"literal", [Pure]> {
 def Custom_LogicalAndOp : Custom_BinaryOp<"logical_and", [CExpression]> {
   let summary = "Logical and operation";
   let description = [{
-    With the `Custom.logical_and` operation the logical operator && (and) can
+    With the `custom.logical_and` operation the logical operator && (and) can
     be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.logical_and %arg0, %arg1 : i32, i32
+    %0 = custom.logical_and %arg0, %arg1 : i32, i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -869,13 +869,13 @@ def Custom_LogicalAndOp : Custom_BinaryOp<"logical_and", [CExpression]> {
 def Custom_LogicalNotOp : Custom_UnaryOp<"logical_not", [CExpression]> {
   let summary = "Logical not operation";
   let description = [{
-    With the `Custom.logical_not` operation the logical operator ! (negation) can
+    With the `custom.logical_not` operation the logical operator ! (negation) can
     be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.logical_not %arg0 : i32
+    %0 = custom.logical_not %arg0 : i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -890,13 +890,13 @@ def Custom_LogicalNotOp : Custom_UnaryOp<"logical_not", [CExpression]> {
 def Custom_LogicalOrOp : Custom_BinaryOp<"logical_or", [CExpression]> {
   let summary = "Logical or operation";
   let description = [{
-    With the `Custom.logical_or` operation the logical operator || (inclusive or)
+    With the `custom.logical_or` operation the logical operator || (inclusive or)
     can be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.logical_or %arg0, %arg1 : i32, i32
+    %0 = custom.logical_or %arg0, %arg1 : i32, i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -922,7 +922,7 @@ def Custom_LoadOp : Custom_Op<"load", [CExpression,
     Example:
 
     ```mlir
-    %1 = Custom.load %0 : !Custom.lvalue<i32>
+    %1 = custom.load %0 : !custom.lvalue<i32>
     ```
     ```c++
     // Code emitted for the operation above.
@@ -940,15 +940,15 @@ def Custom_LoadOp : Custom_Op<"load", [CExpression,
 def Custom_MulOp : Custom_BinaryOp<"mul", [CExpression]> {
   let summary = "Multiplication operation";
   let description = [{
-    With the `Custom.mul` operation the arithmetic operator * (multiplication) can
+    With the `custom.mul` operation the arithmetic operator * (multiplication) can
     be applied.
 
     Example:
 
     ```mlir
     // Custom form of the multiplication operation.
-    %0 = Custom.mul %arg0, %arg1 : (i32, i32) -> i32
-    %1 = Custom.mul %arg2, %arg3 : (f32, f32) -> f32
+    %0 = custom.mul %arg0, %arg1 : (i32, i32) -> i32
+    %1 = custom.mul %arg2, %arg3 : (f32, f32) -> f32
     ```
     ```c++
     // Code emitted for the operations above.
@@ -964,14 +964,14 @@ def Custom_MulOp : Custom_BinaryOp<"mul", [CExpression]> {
 def Custom_RemOp : Custom_BinaryOp<"rem", [CExpression]> {
   let summary = "Remainder operation";
   let description = [{
-    With the `Custom.rem` operation the arithmetic operator % (remainder) can
+    With the `custom.rem` operation the arithmetic operator % (remainder) can
     be applied.
 
     Example:
 
     ```mlir
     // Custom form of the remainder operation.
-    %0 = Custom.rem %arg0, %arg1 : (i32, i32) -> i32
+    %0 = custom.rem %arg0, %arg1 : (i32, i32) -> i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -986,17 +986,17 @@ def Custom_RemOp : Custom_BinaryOp<"rem", [CExpression]> {
 def Custom_SubOp : Custom_BinaryOp<"sub", [CExpression]> {
   let summary = "Subtraction operation";
   let description = [{
-    With the `Custom.sub` operation the arithmetic operator - (subtraction) can
+    With the `custom.sub` operation the arithmetic operator - (subtraction) can
     be applied.
 
     Example:
 
     ```mlir
     // Custom form of the substraction operation.
-    %0 = Custom.sub %arg0, %arg1 : (i32, i32) -> i32
-    %1 = Custom.sub %arg2, %arg3 : (!Custom.ptr<f32>, i32) -> !Custom.ptr<f32>
-    %2 = Custom.sub %arg4, %arg5 : (!Custom.ptr<i32>, !Custom.ptr<i32>)
-        -> !Custom.ptrdiff_t
+    %0 = custom.sub %arg0, %arg1 : (i32, i32) -> i32
+    %1 = custom.sub %arg2, %arg3 : (!custom.ptr<f32>, i32) -> !custom.ptr<f32>
+    %2 = custom.sub %arg4, %arg5 : (!custom.ptr<i32>, !custom.ptr<i32>)
+        -> !custom.ptrdiff_t
     ```
     ```c++
     // Code emitted for the operations above.
@@ -1012,14 +1012,14 @@ def Custom_SubOp : Custom_BinaryOp<"sub", [CExpression]> {
 def Custom_MemberOp : Custom_Op<"member"> {
   let summary = "Member operation";
   let description = [{
-    With the `Custom.member` operation the member access operator `.` can be
+    With the `custom.member` operation the member access operator `.` can be
     applied.
 
     Example:
 
     ```mlir
-    %0 = "Custom.member" (%arg0) {member = "a"}
-        : (!Custom.lvalue<!Custom.opaque<"mystruct">>) -> !Custom.lvalue<i32>
+    %0 = "custom.member" (%arg0) {member = "a"}
+        : (!custom.lvalue<!custom.opaque<"mystruct">>) -> !custom.lvalue<i32>
     ```
   }];
 
@@ -1033,15 +1033,15 @@ def Custom_MemberOp : Custom_Op<"member"> {
 def Custom_MemberOfPtrOp : Custom_Op<"member_of_ptr"> {
   let summary = "Member of pointer operation";
   let description = [{
-    With the `Custom.member_of_ptr` operation the member access operator `->`
+    With the `custom.member_of_ptr` operation the member access operator `->`
     can be applied.
 
     Example:
 
     ```mlir
-    %0 = "Custom.member_of_ptr" (%arg0) {member = "a"}
-        : (!Custom.lvalue<!Custom.ptr<!Custom.opaque<"mystruct">>>)
-        -> !Custom.lvalue<i32>
+    %0 = "custom.member_of_ptr" (%arg0) {member = "a"}
+        : (!custom.lvalue<!custom.ptr<!custom.opaque<"mystruct">>>)
+        -> !custom.lvalue<i32>
     ```
   }];
 
@@ -1056,18 +1056,18 @@ def Custom_ConditionalOp : Custom_Op<"conditional",
     [AllTypesMatch<["true_value", "false_value", "result"]>, CExpression]> {
   let summary = "Conditional (ternary) operation";
   let description = [{
-    With the `Custom.conditional` operation the ternary conditional operator can
+    With the `custom.conditional` operation the ternary conditional operator can
     be applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.cmp gt, %arg0, %arg1 : (i32, i32) -> i1
+    %0 = custom.cmp gt, %arg0, %arg1 : (i32, i32) -> i1
 
-    %c0 = "Custom.constant"() {value = 10 : i32} : () -> i32
-    %c1 = "Custom.constant"() {value = 11 : i32} : () -> i32
+    %c0 = "custom.constant"() {value = 10 : i32} : () -> i32
+    %c1 = "custom.constant"() {value = 11 : i32} : () -> i32
 
-    %1 = Custom.conditional %0, %c0, %c1 : i32
+    %1 = custom.conditional %0, %c0, %c1 : i32
     ```
     ```c++
     // Code emitted for the operations above.
@@ -1085,13 +1085,13 @@ def Custom_ConditionalOp : Custom_Op<"conditional",
 def Custom_UnaryMinusOp : Custom_UnaryOp<"unary_minus", [CExpression]> {
   let summary = "Unary minus operation";
   let description = [{
-    With the `Custom.unary_minus` operation the unary operator - (minus) can be
+    With the `custom.unary_minus` operation the unary operator - (minus) can be
     applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.unary_minus %arg0 : (i32) -> i32
+    %0 = custom.unary_minus %arg0 : (i32) -> i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -1103,13 +1103,13 @@ def Custom_UnaryMinusOp : Custom_UnaryOp<"unary_minus", [CExpression]> {
 def Custom_UnaryPlusOp : Custom_UnaryOp<"unary_plus", [CExpression]> {
   let summary = "Unary plus operation";
   let description = [{
-    With the `Custom.unary_plus` operation the unary operator + (plus) can be
+    With the `custom.unary_plus` operation the unary operator + (plus) can be
     applied.
 
     Example:
 
     ```mlir
-    %0 = Custom.unary_plus %arg0 : (i32) -> i32
+    %0 = custom.unary_plus %arg0 : (i32) -> i32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -1121,35 +1121,35 @@ def Custom_UnaryPlusOp : Custom_UnaryOp<"unary_plus", [CExpression]> {
 def Custom_VariableOp : Custom_Op<"variable", []> {
   let summary = "Variable operation";
   let description = [{
-    The `Custom.variable` operation produces an SSA value equal to some value
+    The `custom.variable` operation produces an SSA value equal to some value
     specified by an attribute. This can be used to form simple integer and
     floating point variables, as well as more exotic things like tensor
-    variables. The `Custom.variable` operation also supports the Custom opaque
+    variables. The `custom.variable` operation also supports the Custom opaque
     attribute and the Custom opaque type. If further supports the Custom
     pointer type, whereas folding is not supported.
-    The `Custom.variable` is emitted as a C/C++ local variable.
+    The `custom.variable` is emitted as a C/C++ local variable.
 
     Example:
 
     ```mlir
     // Integer variable
-    %0 = "Custom.variable"(){value = 42 : i32} : () -> !Custom.lvalue<i32>
+    %0 = "custom.variable"(){value = 42 : i32} : () -> !custom.lvalue<i32>
 
     // Variable emitted as `int32_t* = NULL;`
-    %1 = "Custom.variable"() {value = #Custom.opaque<"NULL">} 
-      : () -> !Custom.lvalue<!Custom.ptr<!Custom.opaque<"int32_t">>>
+    %1 = "custom.variable"() {value = #custom.opaque<"NULL">}
+      : () -> !custom.lvalue<!custom.ptr<!custom.opaque<"int32_t">>>
     ```
 
     Since folding is not supported, it can be used with pointers.
     As an example, it is valid to create pointers to `variable` operations
     by using `apply` operations and pass these to a `call` operation.
     ```mlir
-    %0 = "Custom.variable"() {value = 0 : i32} : () -> !Custom.lvalue<i32>
-    %1 = "Custom.variable"() {value = 0 : i32} : () -> !Custom.lvalue<i32>
-    %2 = Custom.apply "&"(%0) : (!Custom.lvalue<i32>) -> !Custom.ptr<i32>
-    %3 = Custom.apply "&"(%1) : (!Custom.lvalue<i32>) -> !Custom.ptr<i32>
-    Custom.call_opaque "write"(%2, %3)
-      : (!Custom.ptr<i32>, !Custom.ptr<i32>) -> ()
+    %0 = "custom.variable"() {value = 0 : i32} : () -> !custom.lvalue<i32>
+    %1 = "custom.variable"() {value = 0 : i32} : () -> !custom.lvalue<i32>
+    %2 = custom.apply "&"(%0) : (!custom.lvalue<i32>) -> !custom.ptr<i32>
+    %3 = custom.apply "&"(%1) : (!custom.lvalue<i32>) -> !custom.ptr<i32>
+    custom.call_opaque "write"(%2, %3)
+      : (!custom.ptr<i32>, !custom.ptr<i32>) -> ()
     ```
   }];
 
@@ -1163,7 +1163,7 @@ def Custom_VariableOp : Custom_Op<"variable", []> {
 def Custom_GlobalOp : Custom_Op<"global", [Symbol]> {
   let summary = "A global variable";
   let description = [{
-    The `Custom.global` operation declares or defines a named global variable.
+    The `custom.global` operation declares or defines a named global variable.
     The backing memory for the variable is allocated statically and described by
     the variable's type, which must be an Custom type.
     Optionally, an `initial_value` can be provided.
@@ -1175,22 +1175,22 @@ def Custom_GlobalOp : Custom_Op<"global", [Symbol]> {
     unit attribute. Writing to such constant global variables is
     undefined.
 
-    The global variable can be accessed by using the `Custom.get_global` to
+    The global variable can be accessed by using the `custom.get_global` to
     retrieve the value for the global variable.
 
     Example:
 
     ```mlir
     // Global variable with an initial value.
-    Custom.global @x : !Custom.array<2xf32> = dense<0.0>
+    custom.global @x : !custom.array<2xf32> = dense<0.0>
     // Global variable with an initial values.
-    Custom.global @x : !Custom.array<3xi32> = dense<[0, 1, 2]>
+    custom.global @x : !custom.array<3xi32> = dense<[0, 1, 2]>
     // Global variable with an opaque initial value.
-    Custom.global @x : !Custom.opaque<"char"> = #Custom.opaque<"CHAR_MIN">
+    custom.global @x : !custom.opaque<"char"> = #custom.opaque<"CHAR_MIN">
     // External global variable
-    Custom.global extern @x : !Custom.array<2xf32>
+    custom.global extern @x : !custom.array<2xf32>
     // Constant global variable with internal linkage
-    Custom.global static const @x : i32 = 0
+    custom.global static const @x : i32 = 0
     ```
   }];
 
@@ -1217,15 +1217,15 @@ def Custom_GetGlobalOp : Custom_Op<"get_global",
     [Pure, DeclareOpInterfaceMethods<SymbolUserOpInterface>]> {
   let summary = "Obtain access to a global variable";
   let description = [{
-     The `Custom.get_global` operation retrieves the lvalue of a
+     The `custom.get_global` operation retrieves the lvalue of a
      named global variable. If the global variable is marked constant, assigning
      to that lvalue is undefined.
 
      Example:
 
      ```mlir
-     %x = Custom.get_global @foo : !Custom.array<2xf32>
-     %y = Custom.get_global @bar : !Custom.lvalue<i32>
+     %x = custom.get_global @foo : !custom.array<2xf32>
+     %y = custom.get_global @bar : !custom.lvalue<i32>
      ```
   }];
 
@@ -1237,7 +1237,7 @@ def Custom_GetGlobalOp : Custom_Op<"get_global",
 def Custom_VerbatimOp : Custom_Op<"verbatim"> {
   let summary = "Verbatim operation";
   let description = [{
-    The `Custom.verbatim` operation produces no results and the value is emitted as is
+    The `custom.verbatim` operation produces no results and the value is emitted as is
     followed by a line break  ('\n' character) during translation.
 
     Note: Use with caution. This operation can have arbitrary effects on the
@@ -1263,9 +1263,9 @@ def Custom_VerbatimOp : Custom_Op<"verbatim"> {
     #endif
     ```
 
-    If the `Custom.verbatim` op has operands, then the `value` is interpreted as
+    If the `custom.verbatim` op has operands, then the `value` is interpreted as
     format string, where `{}` is a placeholder for an operand in their order.
-    For example, `Custom.verbatim "#pragma my src={} dst={}" %src, %dest : i32, i32`
+    For example, `custom.verbatim "#pragma my src={} dst={}" %src, %dest : i32, i32`
     would be emitted as `#pragma my src=a dst=b` if `%src` became `a` and
     `%dest` became `b` in the C code.
     `{{` in the format string is interpreted as a single `{` and doesn't introduce
@@ -1274,8 +1274,8 @@ def Custom_VerbatimOp : Custom_Op<"verbatim"> {
     Example:
 
     ```mlir
-    Custom.verbatim "typedef float f32;"
-    Custom.verbatim "#pragma my var={} property" args %arg : f32
+    custom.verbatim "typedef float f32;"
+    custom.verbatim "#pragma my var={} property" args %arg : f32
     ```
     ```c++
     // Code emitted for the operation above.
@@ -1302,7 +1302,7 @@ def Custom_VerbatimOp : Custom_Op<"verbatim"> {
 def Custom_AssignOp : Custom_Op<"assign", []> {
   let summary = "Assign operation";
   let description = [{
-    The `Custom.assign` operation stores an SSA value to the location designated by an
+    The `custom.assign` operation stores an SSA value to the location designated by an
     Custom variable. This operation doesn't return any value. The assigned value
     must be of the same type as the variable being assigned. The operation is
     emitted as a C/C++ '=' operator.
@@ -1311,11 +1311,11 @@ def Custom_AssignOp : Custom_Op<"assign", []> {
 
     ```mlir
     // Integer variable
-    %0 = "Custom.variable"(){value = 42 : i32} : () -> !Custom.lvalue<i32>
-    %1 = Custom.call_opaque "foo"() : () -> (i32)
+    %0 = "custom.variable"(){value = 42 : i32} : () -> !custom.lvalue<i32>
+    %1 = custom.call_opaque "foo"() : () -> (i32)
 
     // Assign emitted as `... = ...;`
-    "Custom.assign"(%0, %1) : (!Custom.lvalue<i32>, i32) -> ()
+    "custom.assign"(%0, %1) : (!custom.lvalue<i32>, i32) -> ()
     ```
   }];
 
@@ -1332,11 +1332,11 @@ def Custom_YieldOp : Custom_Op<"yield",
       [Pure, Terminator, ParentOneOf<["ExpressionOp", "IfOp", "ForOp", "SwitchOp"]>]> {
   let summary = "Block termination operation";
   let description = [{
-    The `Custom.yield` terminates its parent Custom op's region, optionally yielding
+    The `custom.yield` terminates its parent Custom op's region, optionally yielding
     an SSA value. The semantics of how the values are yielded is defined by the
     parent operation.
-    If `Custom.yield` has an operand, the operand must match the parent operation's
-    result. If the parent operation defines no values, then the `Custom.yield`
+    If `custom.yield` has an operand, the operand must match the parent operation's
+    result. If the parent operation defines no values, then the `custom.yield`
     may be left out in the custom syntax and the builders will insert one
     implicitly. Otherwise, it has to be present in the syntax to indicate which
     value is yielded.
@@ -1357,12 +1357,12 @@ def Custom_IfOp : Custom_Op<"if",
     RecursiveMemoryEffects, NoRegionArguments]> {
   let summary = "If-then-else operation";
   let description = [{
-    The `Custom.if` operation represents an if-then-else construct for
+    The `custom.if` operation represents an if-then-else construct for
     conditionally executing two regions of code. The operand to an if operation
     is a boolean value. For example:
 
     ```mlir
-    Custom.if %b  {
+    custom.if %b  {
       ...
     } else {
       ...
@@ -1370,7 +1370,7 @@ def Custom_IfOp : Custom_Op<"if",
     ```
 
     The "then" region has exactly 1 block. The "else" region may have 0 or 1
-    blocks. The blocks are always terminated with `Custom.yield`, which can be
+    blocks. The blocks are always terminated with `custom.yield`, which can be
     left out to be inserted implicitly. This operation doesn't produce any
     results.
   }];
@@ -1405,9 +1405,9 @@ def Custom_IfOp : Custom_Op<"if",
     // OpAsmOpInterface Methods
     //===------------------------------------------------------------------===//
 
-    /// Custom ops in the body can omit their 'Custom.' prefix in the assembly.
+    /// Custom ops in the body can omit their 'custom.' prefix in the assembly.
     static ::llvm::StringRef getDefaultDialect() {
-      return "Custom";
+      return "custom";
     }
   }];
   let hasCustomAssemblyFormat = 1;
@@ -1416,7 +1416,7 @@ def Custom_IfOp : Custom_Op<"if",
 def Custom_SubscriptOp : Custom_Op<"subscript", []> {
   let summary = "Subscript operation";
   let description = [{
-    With the `Custom.subscript` operation the subscript operator `[]` can be applied
+    With the `custom.subscript` operation the subscript operator `[]` can be applied
     to variables or arguments of array, pointer and opaque type.
 
     Example:
@@ -1424,10 +1424,10 @@ def Custom_SubscriptOp : Custom_Op<"subscript", []> {
     ```mlir
     %i = index.constant 1
     %j = index.constant 7
-    %0 = Custom.subscript %arg0[%i, %j] : (!Custom.array<4x8xf32>, index, index)
-           -> !Custom.lvalue<f32>
-    %1 = Custom.subscript %arg1[%i] : (!Custom.ptr<i32>, index)
-           -> !Custom.lvalue<i32>
+    %0 = custom.subscript %arg0[%i, %j] : (!custom.array<4x8xf32>, index, index)
+           -> !custom.lvalue<f32>
+    %1 = custom.subscript %arg1[%i] : (!custom.ptr<i32>, index)
+           -> !custom.lvalue<i32>
     ```
   }];
   let arguments = (ins Arg<AnyTypeOf<[
@@ -1470,7 +1470,7 @@ def Custom_SwitchOp : Custom_Op<"switch", [RecursiveMemoryEffects,
                                "getEntrySuccessorRegions"]>]> {
   let summary = "Switch operation";
   let description = [{
-    The `Custom.switch` is a control-flow operation that branches to one of
+    The `custom.switch` is a control-flow operation that branches to one of
     the given regions based on the values of the argument and the cases.
     The operand to a switch operation is a opaque, integral or pointer
     wide types.
@@ -1482,25 +1482,25 @@ def Custom_SwitchOp : Custom_Op<"switch", [RecursiveMemoryEffects,
     region.
 
     The operation does not return any value. Moreover, case regions must be
-    explicitly terminated using the `Custom.yield` operation. Default region is
+    explicitly terminated using the `custom.yield` operation. Default region is
     yielded implicitly.
 
     Example:
 
     ```mlir
     // Example:
-    Custom.switch %0 : i32
+    custom.switch %0 : i32
     case 2 {
-      %1 = Custom.call_opaque "func_b" () : () -> i32
-      Custom.yield
+      %1 = custom.call_opaque "func_b" () : () -> i32
+      custom.yield
     }
     case 5 {
-      %2 = Custom.call_opaque "func_a" () : () -> i32
-      Custom.yield
+      %2 = custom.call_opaque "func_a" () : () -> i32
+      custom.yield
     }
     default {
-      %3 = "Custom.constant"(){value = 42.0 : f32} : () -> f32
-      Custom.call_opaque "func2" (%3) : (f32) -> ()
+      %3 = "custom.constant"(){value = 42.0 : f32} : () -> f32
+      custom.call_opaque "func2" (%3) : (f32) -> ()
     }
     ```
     ```c++
@@ -1547,9 +1547,9 @@ def Custom_SwitchOp : Custom_Op<"switch", [RecursiveMemoryEffects,
     // OpAsmOpInterface Methods
     //===------------------------------------------------------------------===//
 
-    /// Custom ops in the body can omit their 'Custom.' prefix in the assembly.
+    /// Custom ops in the body can omit their 'custom.' prefix in the assembly.
     static ::llvm::StringRef getDefaultDialect() {
-      return "Custom";
+      return "custom";
     }
   }];
 

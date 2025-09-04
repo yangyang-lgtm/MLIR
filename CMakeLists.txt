@@ -18,8 +18,14 @@ if (NOT DEFINED MLIR_CMAKE_DIR)
   set(MLIR_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/lib/cmake/mlir")
 endif()
 
+if (NOT DEFINED CLANG_CMAKE_DIR)
+  set(CLANG_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/lib/cmake/clang")
+  set(CLANG_BIN "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/bin")
+endif ()
+
 message(STATUS "LLVM_CMAKE_DIR: ${LLVM_CMAKE_DIR}")
 message(STATUS "MLIR_CMAKE_DIR: ${MLIR_CMAKE_DIR}")
+message(STATUS "CLANG_CMAKE_DIR: ${CLANG_CMAKE_DIR}")
 
 function(add_triton_object name)
   cmake_parse_arguments(ARG "" "" "DEPENDS;LINK_LIBS" ${ARGN})
@@ -53,13 +59,17 @@ endfunction()
 
 list(APPEND CMAKE_MODULE_PATH ${MLIR_CMAKE_DIR})
 list(APPEND CMAKE_MODULE_PATH ${LLVM_CMAKE_DIR})
+list(APPEND CMAKE_MODULE_PATH ${CLANG_CMAKE_DIR})
 include(LLVMConfig)
 include(MLIRConfig)
+include(ClangConfig)
 include(TableGen)
 include(AddLLVM)
 include(AddMLIR)
+include(AddClang)
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})
+include_directories(${CLANG_INCLUDE_DIRS})
 
 message(STATUS "LLVM_ENABLE_RTTI: ${LLVM_ENABLE_RTTI}")
 if(LLVM_ENABLE_RTTI)
@@ -107,6 +117,14 @@ set(TRITON_LIBRARIES
 set(CUSTOM_LIBS
   CustomDialect
   ConvertToCustom
+  TranslateToCpp
+  Executor
+)
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/include/config.h.in
+  ${CMAKE_BINARY_DIR}/include/config.h
+  @ONLY
 )
 
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)

@@ -60,6 +60,8 @@ macro(FOR_EACH_PASS_GEN TD_FILES CUR_HEADER)
   endforeach()
 endmacro()
 
+add_subdirectory(CodeGen)
 add_subdirectory(Conversion)
 add_subdirectory(CustomDialect)
+add_subdirectory(Execute)
 add_subdirectory(TritonDialect)

@@ -1,0 +1,10 @@
+//
+// Created by ubuntu on 2025/9/4.
+//
+
+#ifndef TRITON_TO_CUSTOM_CONFIG_H
+#define TRITON_TO_CUSTOM_CONFIG_H
+
+#define CLANG_BIN "@CLANG_BIN@"
+
+#endif //TRITON_TO_CUSTOM_CONFIG_H
