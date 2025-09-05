@@ -20,4 +20,12 @@ def ConvertArithToCustom : Pass<"convert-atith-to-custom"> {
   ];
 }
 
+def ConvertSCFToCustom : Pass<"convert-scf-to-custom"> {
+ let summary = "Convert SCF dialect to Custom dialect";
+ let dependentDialects = [
+   "::mlir::custom::CustomDialect",
+   "::mlir::scf::SCFDialect"
+ ];
+}
+
 #endif // CUSTOM_CONVERSION_PASSES

@@ -87,27 +87,34 @@ static std::string createTempFile(const std::string& code) {
   return tempPath.string();
 }
 
-void Executor::reset(const char* gen_code, const char* main_func, const char* include_code){
+void Executor::reset(const char* gen_code, const char* source_path){
   if (gen_code){
     this->gen_code = gen_code;
   }
-  if (main_func){
-    this->main_func = main_func;
-  }
-  if (include_code){
-    this->include_code = include_code;
+  if (source_path){
+    this->source_path = source_path;
   }
 }
 
-void Executor::run(const char* out, bool deleteCodeFile) const {
-  assert(main_func && gen_code && "main & gen code must be not nullptr");
+void Executor::run(bool log_only, const char* out, bool deleteCodeFile) const {
+  assert(source_path && gen_code && "source_path & gen code must be not nullptr");
 
   std::string code;
   std::string outName = std::filesystem::current_path() / "a.out";
-  if (include_code){
-    code = code + include_code + "\n";
+
+  std::ifstream file(source_path);
+  if (!file.is_open()) {
+    std::cerr << "can not open: " << source_path << std::endl;
+    return;
   }
-  code = code + gen_code + "\n" + main_func;
+  std::stringstream buffer;
+  buffer << file.rdbuf();
+  code = buffer.str() + gen_code;
+
+  if (log_only){
+    llvm::outs() << code;
+    return;
+  }
 
   if (out){
     outName = out;
@@ -117,7 +124,7 @@ void Executor::run(const char* out, bool deleteCodeFile) const {
   auto objPath = filePath.substr(0, filePath.length() - 4) + ".o";
 
   std::vector<const char*> args{
-    "clang++", "-std=c++17", "-O2", "-o", outName.c_str(), filePath.c_str()
+    "clang++", "-std=c++17", "-O2", "-I", CODEGEN_INCLUDE, "-o", outName.c_str(), filePath.c_str()
   };
 
   auto diagOpts = std::make_unique<clang::DiagnosticOptions>();

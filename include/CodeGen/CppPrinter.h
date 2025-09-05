@@ -35,6 +35,7 @@ struct CppPrinter{
   LogicalResult printOperation(custom::GlobalOp globalOp);
   LogicalResult printOperation(custom::AssignOp assignOp);
   LogicalResult printOperation(custom::LoadOp loadOp);
+  // LogicalResult printTensorBinaryOperation(Operation *operation, StringRef binaryOperator);
   LogicalResult printVecBinaryOperation(Operation *operation, StringRef binaryOperator);
   LogicalResult printBinaryOperation(Operation *operation, StringRef binaryOperator);
   LogicalResult printUnaryOperation(Operation *operation, StringRef unaryOperator);

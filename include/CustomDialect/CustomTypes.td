@@ -14,8 +14,8 @@ def CustomIntegerType : Type<CPred<"custom::isSupportedIntegerType($_self)">,
 def CustomFloatType : Type<CPred<"custom::isSupportedFloatType($_self)">,
     "floating-point type supported by Custom">;
 
-class Custom_Type<string name, string typeMnemonic, list<Trait> traits = []>
-    : TypeDef<Custom_Dialect, name, traits> {
+class Custom_Type<string name, string typeMnemonic, list<Trait> traits = [], string baseCppClass = "::mlir::Type">
+    : TypeDef<Custom_Dialect, name, traits, baseCppClass> {
   let mnemonic = typeMnemonic;
 }
 
@@ -65,6 +65,30 @@ def Custom_ArrayType : Custom_Type<"Array", "array", [ShapedTypeInterface]> {
   }];
   let genVerifyDecl = 1;
   let hasCustomAssemblyFormat = 1;
+}
+
+def Custom_TensorType : Custom_Type<"CTensor", "c_tensor", [ShapedTypeInterface], "::mlir::TensorType">{
+  let summary = "the summary of custom tensor type";
+  let description = "description of custom tensor type";
+
+  let parameters = (ins
+    ArrayRefParameter<"int64_t">:$shape,
+    "Type":$elementType
+  );
+
+  let builders = [
+    TypeBuilderWithInferredContext<(ins
+      "ArrayRef<int64_t>":$shape,
+      "Type":$elementType
+    ), [{
+      return $_get(elementType.getContext(), shape, elementType);
+    }]>
+  ];
+
+  let genStorageClass = 1;
+  let hasStorageCustomConstructor = 0;
+  let assemblyFormat = "`<`$shape`,`$elementType`>`";
+  let genVerifyDecl = 1;
 }
 
 def Custom_LValueType : Custom_Type<"LValue", "lvalue"> {

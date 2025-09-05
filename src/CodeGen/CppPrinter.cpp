@@ -246,6 +246,19 @@ LogicalResult CppPrinter::printOperation(custom::LoadOp loadOp) {
   return emitter.emitOperand(loadOp.getOperand());
 }
 
+// LogicalResult CppPrinter::printTensorBinaryOperation(Operation *operation, StringRef binaryOperator){
+//   raw_ostream &os = emitter.ostream();
+//
+//   // static const std::unordered_map<std::string, std::string> operatorMapper{
+//   //   {"+", "add"}, {"-", "sub"}, {"*", "mul"}, {"/", "div"}
+//   // };
+//
+//   if (failed(emitter.emitAssignPrefix(*operation))){
+//     return failure();
+//   }
+//
+// }
+
 LogicalResult CppPrinter::printVecBinaryOperation(Operation *operation, StringRef binaryOperator){
   raw_ostream &os = emitter.ostream();
   auto result = operation->getResult(0);
@@ -281,6 +294,10 @@ LogicalResult CppPrinter::printVecBinaryOperation(Operation *operation, StringRe
 }
 
 LogicalResult CppPrinter::printBinaryOperation(Operation *operation, StringRef binaryOperator) {
+  // if (isa<custom::CTensorType>(operation->getResult(0).getType())){
+  //   return printTensorBinaryOperation(operation, binaryOperator);
+  // }
+
   if (isa<custom::ArrayType>(operation->getResult(0).getType())){
     return printVecBinaryOperation(operation, binaryOperator);
   }
@@ -1385,6 +1402,22 @@ LogicalResult CppEmitter::emitOperation(Operation &op, bool trailingSemicolon) {
 }
 
 LogicalResult CppEmitter::emitVariableDeclaration(Location loc, Type type, StringRef name) {
+  if (auto tType = dyn_cast<custom::CTensorType>(type)){
+    os << "Tensor<";
+    if (failed(emitType(loc, tType.getElementType()))){
+      return failure();
+    }
+    os << "> " << name << "({";
+    if (tType.getShape().empty()){
+      return failure();
+    }
+    os << tType.getShape()[0];
+    for (auto i = 1; i < tType.getShape().size(); ++i){
+      os << "," << tType.getShape()[i];
+    }
+    os << "})";
+    return success();
+  }
   if (auto arrType = dyn_cast<custom::ArrayType>(type)) {
     if (failed(emitType(loc, arrType.getElementType()))){
       return failure();
@@ -1429,6 +1462,17 @@ LogicalResult CppEmitter::emitType(Location loc, Type type) {
     default:
       return emitError(loc, "cannot emit float type ") << type;
     }
+  }
+  if (auto tType = dyn_cast<custom::CTensorType>(type)){
+    os << "Tensor<";
+    if (failed(emitType(loc, tType.getElementType()))){
+      return failure();
+    }
+    for (auto dim : tType.getShape()){
+      os << "," << dim;
+    }
+    os << ">";
+    return success();
   }
   if (auto iType = dyn_cast<IndexType>(type)){
     return (os << "size_t"), success();

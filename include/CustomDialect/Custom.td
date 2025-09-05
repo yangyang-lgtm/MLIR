@@ -908,11 +908,7 @@ def Custom_LogicalOrOp : Custom_BinaryOp<"logical_or", [CExpression]> {
   let assemblyFormat = "operands attr-dict `:` type(operands)";
 }
 
-def Custom_LoadOp : Custom_Op<"load", [CExpression,
-  TypesMatchWith<"result type matches value type of 'operand'",
-                  "operand", "result",
-                  "::llvm::cast<LValueType>($_self).getValueType()">
-]> {
+def Custom_LoadOp : Custom_Op<"load", [CExpression]> {
   let summary = "Load an lvalue into an SSA value.";
   let description = [{
     This operation loads the content of a modifiable lvalue into an SSA value. 
@@ -931,10 +927,8 @@ def Custom_LoadOp : Custom_Op<"load", [CExpression,
   }];
 
   let arguments = (ins 
-      Res<Custom_LValueType, "", [MemRead<DefaultResource, 0, FullEffect>]>:$operand);
+      Res<AnyTypeOf<[Custom_LValueType, Custom_TensorType]>, "", [MemRead<DefaultResource, 0, FullEffect>]>:$operand);
   let results = (outs AnyType:$result);
-
-  let assemblyFormat = "$operand attr-dict `:` type($operand)"; 
 }
 
 def Custom_MulOp : Custom_BinaryOp<"mul", [CExpression]> {
@@ -1154,7 +1148,7 @@ def Custom_VariableOp : Custom_Op<"variable", []> {
   }];
 
   let arguments = (ins Custom_OpaqueOrTypedAttr:$value);
-  let results = (outs Res<AnyTypeOf<[Custom_ArrayType, Custom_LValueType]>, "",
+  let results = (outs Res<AnyTypeOf<[Custom_ArrayType, Custom_LValueType, Custom_TensorType]>, "",
                           [MemAlloc<DefaultResource, 0, FullEffect>]>);
 
   let hasVerifier = 1;
@@ -1320,7 +1314,7 @@ def Custom_AssignOp : Custom_Op<"assign", []> {
   }];
 
   let arguments = (ins 
-      Res<Custom_LValueType, "", [MemWrite<DefaultResource, 1, FullEffect>]>:$var,
+      Res<AnyTypeOf<[Custom_LValueType, Custom_TensorType]>, "", [MemWrite<DefaultResource, 1, FullEffect>]>:$var,
       CustomType:$value);
   let results = (outs);
 
@@ -1557,7 +1551,6 @@ def Custom_SwitchOp : Custom_Op<"switch", [RecursiveMemoryEffects,
 }
 
 // custom extern op
-
 def Custom_LoadexOp : Custom_Op<"load_ex", [CExpression]> {
   let summary = "Load from a tensor of pointers or from a tensor pointer";
 
@@ -1568,7 +1561,7 @@ def Custom_LoadexOp : Custom_Op<"load_ex", [CExpression]> {
     CustomIntegerType:$valid_size
   );
 
-  let results = (outs Custom_ArrayType:$result);
+  let results = (outs Custom_TensorType:$result);
 }
 
 def Custom_StoreexOp : Custom_Op<"store_ex", [CExpression]> {
@@ -1577,7 +1570,7 @@ def Custom_StoreexOp : Custom_Op<"store_ex", [CExpression]> {
   let arguments = (
     ins
     Custom_PointerType:$ptr,
-    Custom_ArrayType:$value,
+    Custom_TensorType:$value,
     CustomIntegerType:$valid_size
   );
 }

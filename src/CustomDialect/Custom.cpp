@@ -56,13 +56,17 @@ void mlir::custom::buildTerminatedBody(OpBuilder &builder, Location loc) {
 bool mlir::custom::isSupportedCustomType(Type type) {
   if (llvm::isa<custom::OpaqueType>(type))
     return true;
+  if (auto tensorType = llvm::dyn_cast<custom::CTensorType>(type))
+    return true;
   if (auto ptrType = llvm::dyn_cast<custom::PointerType>(type))
     return isSupportedCustomType(ptrType.getPointee());
   if (auto arrayType = llvm::dyn_cast<custom::ArrayType>(type)) {
     auto elemType = arrayType.getElementType();
     return !llvm::isa<custom::ArrayType>(elemType) &&
+           !llvm::isa<custom::CTensorType>(elemType) &&
            isSupportedCustomType(elemType);
   }
+
   if (type.isIndex() || custom::isPointerWideType(type))
     return true;
   if (llvm::isa<IntegerType>(type))
@@ -277,18 +281,41 @@ LogicalResult ApplyOp::verify() {
 /// The assign op requires that the assigned value's type matches the
 /// assigned-to variable type.
 LogicalResult custom::AssignOp::verify() {
-  TypedValue<custom::LValueType> variable = getVar();
 
-  if (!variable.getDefiningOp())
+  if (!getVar().getDefiningOp())
     return emitOpError() << "cannot assign to block argument";
 
-  Type valueType = getValue().getType();
-  Type variableType = variable.getType().getValueType();
-  if (variableType != valueType)
+  if (!llvm::isa<TypedValue<custom::LValueType>>(getVar()) &&
+      !llvm::isa<TypedValue<custom::CTensorType>>(getVar())){
+    return emitOpError() << "AssignOp requires value's type in [CTensorType, LValueType]\n"
+                          << "but got: " << getVar();
+  }
+
+  if (llvm::isa<TypedValue<custom::LValueType>>(getVar())){
+    auto variable = cast<TypedValue<custom::LValueType>>(getVar());
+    Type valueType = getValue().getType();
+    Type variableType = variable.getType().getValueType();
+    if (variableType != valueType)
+      return emitOpError() << "requires value's type (" << valueType
+                           << ") to match variable's type (" << variableType
+                           << ")\n  variable: " << variable
+                           << "\n  value: " << getValue() << "\n";
+    return success();
+  }
+
+  assert(llvm::isa<TypedValue<custom::CTensorType>>(getVar()));
+
+  auto variable = cast<TypedValue<custom::CTensorType>>(getVar());
+  auto variableType = cast<custom::CTensorType>(variable.getType());
+  auto valueType = cast<custom::CTensorType>(getValue().getType());
+
+  if (valueType.getElementType() != variableType.getElementType()){
     return emitOpError() << "requires value's type (" << valueType
                          << ") to match variable's type (" << variableType
                          << ")\n  variable: " << variable
                          << "\n  value: " << getValue() << "\n";
+  }
+
   return success();
 }
 
@@ -1080,6 +1107,25 @@ custom::ArrayType::cloneWith(std::optional<ArrayRef<int64_t>> shape,
   if (!shape)
     return custom::ArrayType::get(getShape(), elementType);
   return custom::ArrayType::get(*shape, elementType);
+}
+
+//===----------------------------------------------------------------------===//
+// CTensorType
+//===----------------------------------------------------------------------===//
+
+LogicalResult mlir::custom::CTensorType::verify(
+    llvm::function_ref<::mlir::InFlightDiagnostic()> emitError,
+    llvm::ArrayRef<int64_t> shape, mlir::Type elementType){
+  if (shape.empty()){
+    return emitError() << "shape must be not empty in CTensorType";
+  }
+
+  if (mlir::custom::isSupportedFloatType(elementType) ||
+      mlir::custom::isSupportedIntegerType(elementType)){
+    return success();
+  }
+
+  return emitError() << "illegal type : " << elementType;
 }
 
 //===----------------------------------------------------------------------===//

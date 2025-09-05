@@ -32,7 +32,9 @@ void populateCustomTypeConversions(TypeConverter& converter){
 
   // 转换 Triton Tensor 类型（可能需要展平或特殊处理）
   converter.addConversion([](RankedTensorType tensorType) -> Type {
-      return custom::ArrayType::get(tensorType.getShape(), tensorType.getElementType());
+    return custom::CTensorType::get(tensorType.getShape(), tensorType.getElementType());
+    // return custom::CustomTensorType::get(tensorType.getShape(), tensorType.getElementType());
+      // return custom::ArrayType::get(tensorType.getShape(), tensorType.getElementType());
   });
 
   converter.addSourceMaterialization(materializeAsUnrealizedCast);

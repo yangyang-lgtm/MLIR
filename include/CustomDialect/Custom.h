@@ -1,6 +1,7 @@
 #ifndef MLIR_DIALECT_CUSTOM_IR_CUSTOM_H
 #define MLIR_DIALECT_CUSTOM_IR_CUSTOM_H
 
+#include "llvm/Support/Casting.h"
 #include "mlir/Bytecode/BytecodeOpInterface.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinOps.h"
@@ -21,6 +22,7 @@
 
 namespace mlir {
 namespace custom {
+
 void buildTerminatedBody(OpBuilder &builder, Location loc);
 
 /// Determines whether \p type is valid in Custom.
