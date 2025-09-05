@@ -1319,7 +1319,7 @@ def Custom_AssignOp : Custom_Op<"assign", []> {
   let results = (outs);
 
   let hasVerifier = 1;
-  let assemblyFormat = "$value `:` type($value) `to` $var `:` type($var) attr-dict";
+//  let assemblyFormat = "$value `:` type($value) `to` $var `:` type($var) attr-dict";
 }
 
 def Custom_YieldOp : Custom_Op<"yield",

@@ -127,9 +127,61 @@ struct IfLowering : public OpConversionPattern<scf::IfOp> {
   }
 };
 
+struct ForLowering : public OpConversionPattern<scf::ForOp> {
+  using OpConversionPattern<scf::ForOp>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(scf::ForOp forOp, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override{
+    Location loc = forOp.getLoc();
+
+    SmallVector<Value> resultVariables;
+    if (failed(createVariablesForResults(forOp, getTypeConverter(), rewriter,
+                                         resultVariables)))
+      return rewriter.notifyMatchFailure(forOp,
+                                         "create variables for results failed");
+
+    assignValues(adaptor.getInitArgs(), resultVariables, rewriter, loc);
+
+    custom::ForOp loweredFor = rewriter.create<custom::ForOp>(
+        loc, adaptor.getLowerBound(), adaptor.getUpperBound(), adaptor.getStep());
+
+    Block *loweredBody = loweredFor.getBody();
+    rewriter.eraseOp(loweredBody->getTerminator());
+
+    IRRewriter::InsertPoint ip = rewriter.saveInsertionPoint();
+    rewriter.setInsertionPointToEnd(loweredBody);
+
+    auto iterArgsValues = loadValues(resultVariables, rewriter, loc);
+    rewriter.restoreInsertionPoint(ip);
+
+    if (failed(rewriter.convertRegionTypes(&forOp.getRegion(),
+                                           *getTypeConverter(), nullptr))) {
+      return rewriter.notifyMatchFailure(forOp, "region types conversion failed");
+    }
+
+    Block *scfBody = &(forOp.getRegion().front());
+    SmallVector<Value> replacingValues;
+    replacingValues.push_back(loweredFor.getInductionVar());
+    replacingValues.append(iterArgsValues.begin(), iterArgsValues.end());
+    rewriter.mergeBlocks(scfBody, loweredBody, replacingValues);
+
+    auto result = lowerYield(forOp, resultVariables, rewriter,
+                             cast<scf::YieldOp>(loweredBody->getTerminator()));
+
+    if (failed(result)) {
+      return result;
+    }
+
+    rewriter.replaceOp(forOp, loadValues(resultVariables, rewriter, loc));
+    return success();
+  }
+};
+
 void populateSCFToCustomPatterns(mlir::TypeConverter &typeConverter, mlir::RewritePatternSet &patterns){
   populateCustomSizeTTypeConversions(typeConverter);
   patterns.add<IfLowering>(typeConverter, patterns.getContext());
+  patterns.add<ForLowering>(typeConverter, patterns.getContext());
 }
 
 }

@@ -107,6 +107,9 @@ void Executor::run(bool logOnly, const char* out, bool deleteCodeFile) const {
     std::cerr << "can not open: " << sourcePath << std::endl;
     return;
   }
+
+  llvm::outs() << "codegen with " << sourcePath << "\n";
+
   std::stringstream buffer;
   buffer << file.rdbuf();
   code = buffer.str() + genCode;

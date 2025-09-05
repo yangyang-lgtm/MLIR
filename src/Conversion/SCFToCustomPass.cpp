@@ -30,7 +30,7 @@ class ConvertSCFToCustom : public impl::ConvertSCFToCustomBase<ConvertSCFToCusto
     populateSCFToCustomPatterns(typeConverter, patterns);
 
     ConversionTarget target(getContext());
-    target.addIllegalOp<scf::IfOp>();
+    target.addIllegalOp<scf::IfOp, scf::ForOp>();
     target.markUnknownOpDynamicallyLegal([](Operation *) { return true; });
     if (failed(applyPartialConversion(getOperation(), target, std::move(patterns)))){
       signalPassFailure();

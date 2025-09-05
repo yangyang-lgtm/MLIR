@@ -1351,7 +1351,7 @@ LogicalResult CppEmitter::emitOperation(Operation &op, bool trailingSemicolon) {
                 custom::CallOpaqueOp, custom::CastOp, custom::CmpOp,
                 custom::ConditionalOp, custom::ConstantOp, custom::DeclareFuncOp,
                 custom::DivOp, custom::ExpressionOp, custom::FileOp, custom::ForOp,
-                custom::FuncOp, custom::GlobalOp, custom::IfOp,
+                custom::FuncOp, custom::GlobalOp, custom::IfOp, custom::ForOp,
                 custom::LoadOp, custom::LogicalAndOp, custom::LogicalNotOp,
                 custom::LogicalOrOp, custom::MulOp, custom::RemOp, custom::ReturnOp,
                 custom::SubOp, custom::SwitchOp, custom::UnaryMinusOp,
