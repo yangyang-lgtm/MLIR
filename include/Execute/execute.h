@@ -9,15 +9,15 @@ namespace mlir::custom{
 
 struct Executor{
   Executor() = default;
-  Executor(const char* gen_code, const char* source_path)
-    : gen_code(gen_code), source_path(source_path) {}
+  Executor(const char* genCode, const char* sourcePath)
+    : genCode(genCode), sourcePath(sourcePath) {}
 
-  void reset(const char* gen_code, const char* source_path);
-  void run(bool log_only = false, const char* out = nullptr, bool deleteCodeFile = true) const;
+  void reset(const char* genCode, const char* sourcePath);
+  void run(bool logOnly = false, const char* out = nullptr, bool deleteCodeFile = true) const;
 
 private:
-  const char* gen_code {nullptr};
-  const char* source_path {nullptr};
+  const char* genCode {nullptr};
+  const char* sourcePath {nullptr};
 };
 
 }

@@ -20,6 +20,7 @@
 #include "Execute/execute.h"
 
 #include "utils.h"
+#include "config.h"
 
 template<typename... Ts>
 static void add_dialects(mlir::MLIRContext& context){
@@ -46,11 +47,12 @@ int main (int argc, char** argv) {
     return 0;
   }
 
+  auto mlirPath = std::string(CODEGEN_INCLUDE) + "/" + argv[1];
   auto context = mlir::MLIRContext();
   init_context(context);
 
   mlir::OwningOpRef<mlir::ModuleOp> module;
-  if (mlir::utils::file::ParseFile<mlir::ModuleOp>(context, module, argv[1]).failed()){
+  if (mlir::utils::file::ParseFile<mlir::ModuleOp>(context, module, mlirPath.c_str()).failed()){
     llvm::outs() << "parse ir string failed!\n";
   }
 
@@ -82,7 +84,7 @@ int main (int argc, char** argv) {
     llvm::outs() << "codegen module error!\n";
   }
 
-  auto path = genSourcePath(argv[1]);
+  auto path = genSourcePath(mlirPath);
   mlir::custom::Executor executor(
     stringPrinter.get_buffer_or_path().c_str(), path.c_str());
 

@@ -87,31 +87,31 @@ static std::string createTempFile(const std::string& code) {
   return tempPath.string();
 }
 
-void Executor::reset(const char* gen_code, const char* source_path){
-  if (gen_code){
-    this->gen_code = gen_code;
+void Executor::reset(const char* genCode, const char* sourcePath){
+  if (genCode){
+    this->genCode = genCode;
   }
-  if (source_path){
-    this->source_path = source_path;
+  if (sourcePath){
+    this->sourcePath = sourcePath;
   }
 }
 
-void Executor::run(bool log_only, const char* out, bool deleteCodeFile) const {
-  assert(source_path && gen_code && "source_path & gen code must be not nullptr");
+void Executor::run(bool logOnly, const char* out, bool deleteCodeFile) const {
+  assert(sourcePath && genCode && "sourcePath & gen code must be not nullptr");
 
   std::string code;
   std::string outName = std::filesystem::current_path() / "a.out";
 
-  std::ifstream file(source_path);
+  std::ifstream file(sourcePath);
   if (!file.is_open()) {
-    std::cerr << "can not open: " << source_path << std::endl;
+    std::cerr << "can not open: " << sourcePath << std::endl;
     return;
   }
   std::stringstream buffer;
   buffer << file.rdbuf();
-  code = buffer.str() + gen_code;
+  code = buffer.str() + genCode;
 
-  if (log_only){
+  if (logOnly){
     llvm::outs() << code;
     return;
   }
