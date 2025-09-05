@@ -114,6 +114,7 @@ void Executor::run(const char* out, bool deleteCodeFile) const {
   }
 
   auto filePath = createTempFile(code);
+  auto objPath = filePath.substr(0, filePath.length() - 4) + ".o";
 
   std::vector<const char*> args{
     "clang++", "-std=c++17", "-O2", "-o", outName.c_str(), filePath.c_str()
@@ -150,6 +151,7 @@ void Executor::run(const char* out, bool deleteCodeFile) const {
 
   if (deleteCodeFile){
     (void)compilation->CleanupFile(filePath.c_str());
+    (void)compilation->CleanupFile(objPath.c_str());
   }
 
   if (!FailingCommands.empty()){

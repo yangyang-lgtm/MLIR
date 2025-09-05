@@ -20,6 +20,66 @@
 
 namespace mlir::custom{
 
+struct CppEmitter;
+
+struct CppPrinter{
+  explicit CppPrinter(CppEmitter &emitter) : emitter(emitter){}
+
+  LogicalResult printConstantOp(Operation *operation, Attribute value);
+  LogicalResult printOperation(custom::GetProgramIdOp getProgramIdOp);
+  LogicalResult printOperation(custom::LoadexOp loadexOp);
+  LogicalResult printOperation(custom::StoreexOp storeexOp);
+  LogicalResult printOperation(custom::MinSIOp minsiOp);
+  LogicalResult printOperation(custom::ConstantOp constantOp);
+  LogicalResult printOperation(custom::VariableOp variableOp);
+  LogicalResult printOperation(custom::GlobalOp globalOp);
+  LogicalResult printOperation(custom::AssignOp assignOp);
+  LogicalResult printOperation(custom::LoadOp loadOp);
+  LogicalResult printVecBinaryOperation(Operation *operation, StringRef binaryOperator);
+  LogicalResult printBinaryOperation(Operation *operation, StringRef binaryOperator);
+  LogicalResult printUnaryOperation(Operation *operation, StringRef unaryOperator);
+  LogicalResult printOperation(custom::AddOp addOp);
+  LogicalResult printOperation(custom::DivOp divOp);
+  LogicalResult printOperation(custom::MulOp mulOp);
+  LogicalResult printOperation(custom::RemOp remOp);
+  LogicalResult printOperation(custom::SubOp subOp);
+  LogicalResult emitSwitchCase(raw_indented_ostream &os, Region &region);
+  LogicalResult printOperation(custom::SwitchOp switchOp);
+  LogicalResult printOperation(custom::CmpOp cmpOp);
+  LogicalResult printOperation(custom::ConditionalOp conditionalOp);
+  LogicalResult printOperation(custom::VerbatimOp verbatimOp);
+  LogicalResult printCallOperation(Operation *callOp, StringRef callee);
+  LogicalResult printOperation(custom::CallOp callOp);
+  LogicalResult printOperation(custom::CallOpaqueOp callOpaqueOp);
+  LogicalResult printOperation(custom::ApplyOp applyOp);
+  LogicalResult printOperation(custom::BitwiseAndOp bitwiseAndOp);
+  LogicalResult printOperation(custom::BitwiseLeftShiftOp bitwiseLeftShiftOp);
+  LogicalResult printOperation(custom::BitwiseNotOp bitwiseNotOp);
+  LogicalResult printOperation(custom::BitwiseOrOp bitwiseOrOp);
+  LogicalResult printOperation(custom::BitwiseRightShiftOp bitwiseRightShiftOp);
+  LogicalResult printOperation(custom::BitwiseXorOp bitwiseXorOp);
+  LogicalResult printOperation(custom::UnaryPlusOp unaryPlusOp);
+  LogicalResult printOperation(custom::UnaryMinusOp unaryMinusOp);
+  LogicalResult printOperation(custom::CastOp castOp);
+  LogicalResult printOperation(custom::ExpressionOp expressionOp);
+  LogicalResult printOperation(custom::LogicalAndOp logicalAndOp);
+  LogicalResult printOperation(custom::LogicalNotOp logicalNotOp);
+  LogicalResult printOperation(custom::LogicalOrOp logicalOrOp);
+  LogicalResult printOperation(custom::ForOp forOp);
+  LogicalResult printOperation(custom::IfOp ifOp);
+  LogicalResult printOperation(custom::ReturnOp returnOp);
+  LogicalResult printOperation(ModuleOp moduleOp);
+  LogicalResult printOperation(FileOp file);
+  LogicalResult printFunctionArgs(Operation *functionOp, ArrayRef<Type> arguments);
+  LogicalResult printFunctionArgs(Operation *functionOp, Region::BlockArgListType arguments);
+  LogicalResult printFunctionBody(Operation *functionOp, Region::BlockListType &blocks);
+  LogicalResult printOperation(custom::FuncOp functionOp);
+  LogicalResult printOperation(custom::DeclareFuncOp declareFuncOp);
+
+private:
+  CppEmitter &emitter;
+};
+
 struct CppEmitter {
   explicit CppEmitter(raw_ostream &os, bool declareVariablesAtTop, StringRef fileId);
 
@@ -29,6 +89,7 @@ struct CppEmitter {
   LogicalResult emitTypes(Location loc, ArrayRef<Type> types);
   LogicalResult emitTupleType(Location loc, ArrayRef<Type> types);
   LogicalResult emitVariableAssignment(OpResult result);
+  LogicalResult emitVariableMaybeDeclaration(OpResult result, bool trailingSemicolon);
   LogicalResult emitVariableDeclaration(OpResult result, bool trailingSemicolon);
   LogicalResult emitVariableDeclaration(Location loc, Type type, StringRef name);
   LogicalResult emitAssignPrefix(Operation &op);
@@ -84,6 +145,7 @@ private:
   raw_indented_ostream os;
   bool declareVariablesAtTop;
   std::string fileId;
+  CppPrinter printer;
   ValueMapper valueMapper;
   BlockMapper blockMapper;
 

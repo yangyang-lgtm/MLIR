@@ -117,8 +117,8 @@ static bool shouldBeInlined(custom::ExpressionOp expressionOp) {
   return !user->hasTrait<OpTrait::custom::CExpression>();
 }
 
-static LogicalResult printConstantOp(CppEmitter &emitter, Operation *operation,
-                                     Attribute value) {
+LogicalResult CppPrinter::printConstantOp(Operation *operation,
+                                          Attribute value) {
   OpResult result = operation->getResult(0);
 
   if (emitter.shouldDeclareVariablesAtTop()) {
@@ -146,7 +146,7 @@ static LogicalResult printConstantOp(CppEmitter &emitter, Operation *operation,
   return emitter.emitAttribute(operation->getLoc(), value);
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::GetProgramIdOp getProgramIdOp){
+LogicalResult CppPrinter::printOperation(custom::GetProgramIdOp getProgramIdOp){
   if (failed(emitter.emitAssignPrefix(*getProgramIdOp.getOperation()))){
     return failure();
   }
@@ -154,12 +154,12 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::GetProgramIdOp 
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::LoadexOp loadexOp){
+LogicalResult CppPrinter::printOperation(custom::LoadexOp loadexOp){
   auto operation = loadexOp.getOperation();
   auto result = operation->getResult(0);
   auto &os = emitter.ostream();
 
-  if (failed(emitter.emitVariableDeclaration(result, true))){
+  if (failed(emitter.emitVariableMaybeDeclaration(result, true))){
     return failure();
   }
 
@@ -175,7 +175,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::LoadexOp loadex
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::StoreexOp storeexOp){
+LogicalResult CppPrinter::printOperation(custom::StoreexOp storeexOp){
   auto operation = storeexOp.getOperation();
   auto &os = emitter.ostream();
 
@@ -195,7 +195,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::StoreexOp store
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::MinSIOp minsiOp){
+LogicalResult CppPrinter::printOperation(custom::MinSIOp minsiOp){
   if (failed(emitter.emitAssignPrefix(*minsiOp.getOperation()))){
     return failure();
   }
@@ -212,24 +212,23 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::MinSIOp minsiOp
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::ConstantOp constantOp) {
+LogicalResult CppPrinter::printOperation(custom::ConstantOp constantOp) {
   Operation *operation = constantOp.getOperation();
   Attribute value = constantOp.getValue();
-  return printConstantOp(emitter, operation, value);
+  return printConstantOp(operation, value);
 }
 
-static LogicalResult printOperation(CppEmitter &emitter,
-                                    custom::VariableOp variableOp) {
+LogicalResult CppPrinter::printOperation(custom::VariableOp variableOp) {
   Operation *operation = variableOp.getOperation();
   Attribute value = variableOp.getValue();
-  return printConstantOp(emitter, operation, value);
+  return printConstantOp(operation, value);
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::GlobalOp globalOp) {
+LogicalResult CppPrinter::printOperation(custom::GlobalOp globalOp) {
   return emitter.emitGlobalVariable(globalOp);
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::AssignOp assignOp) {
+LogicalResult CppPrinter::printOperation(custom::AssignOp assignOp) {
   OpResult result = assignOp.getVar().getDefiningOp()->getResult(0);
 
   if (failed(emitter.emitVariableAssignment(result))){
@@ -239,7 +238,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::AssignOp assign
   return emitter.emitOperand(assignOp.getValue());
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::LoadOp loadOp) {
+LogicalResult CppPrinter::printOperation(custom::LoadOp loadOp) {
   if (failed(emitter.emitAssignPrefix(*loadOp))){
     return failure();
   }
@@ -247,16 +246,14 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::LoadOp loadOp) 
   return emitter.emitOperand(loadOp.getOperand());
 }
 
-static LogicalResult printVecBinaryOperation(CppEmitter &emitter,
-                                             Operation *operation,
-                                             StringRef binaryOperator){
+LogicalResult CppPrinter::printVecBinaryOperation(Operation *operation, StringRef binaryOperator){
   raw_ostream &os = emitter.ostream();
   auto result = operation->getResult(0);
   auto shape = dyn_cast<custom::ArrayType>(result.getType()).getShape();
 
   assert(!shape.empty() && "Vec shape can not be empty");
 
-  if (failed(emitter.emitVariableDeclaration(result, true))){
+  if (failed(emitter.emitVariableMaybeDeclaration(result, true))){
     return failure();
   }
 
@@ -283,11 +280,9 @@ static LogicalResult printVecBinaryOperation(CppEmitter &emitter,
   return success();
 }
 
-static LogicalResult printBinaryOperation(CppEmitter &emitter,
-                                          Operation *operation,
-                                          StringRef binaryOperator) {
+LogicalResult CppPrinter::printBinaryOperation(Operation *operation, StringRef binaryOperator) {
   if (isa<custom::ArrayType>(operation->getResult(0).getType())){
-    return printVecBinaryOperation(emitter, operation, binaryOperator);
+    return printVecBinaryOperation(operation, binaryOperator);
   }
 
   raw_ostream &os = emitter.ostream();
@@ -309,9 +304,7 @@ static LogicalResult printBinaryOperation(CppEmitter &emitter,
   return success();
 }
 
-static LogicalResult printUnaryOperation(CppEmitter &emitter,
-                                         Operation *operation,
-                                         StringRef unaryOperator) {
+LogicalResult CppPrinter::printUnaryOperation(Operation *operation, StringRef unaryOperator) {
   raw_ostream &os = emitter.ostream();
 
   if (failed(emitter.emitAssignPrefix(*operation))){
@@ -327,28 +320,27 @@ static LogicalResult printUnaryOperation(CppEmitter &emitter,
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::AddOp addOp) {
-  return printBinaryOperation(emitter, addOp.getOperation(), "+");
+LogicalResult CppPrinter::printOperation(custom::AddOp addOp) {
+  return printBinaryOperation(addOp.getOperation(), "+");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::DivOp divOp) {
-  return printBinaryOperation(emitter, divOp.getOperation(), "/");
+LogicalResult CppPrinter::printOperation(custom::DivOp divOp) {
+  return printBinaryOperation(divOp.getOperation(), "/");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::MulOp mulOp) {
-  return printBinaryOperation(emitter, mulOp.getOperation(), "*");
+LogicalResult CppPrinter::printOperation(custom::MulOp mulOp) {
+  return printBinaryOperation(mulOp.getOperation(), "*");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::RemOp remOp) {
-  return printBinaryOperation(emitter, remOp.getOperation(), "%");
+LogicalResult CppPrinter::printOperation(custom::RemOp remOp) {
+  return printBinaryOperation(remOp.getOperation(), "%");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::SubOp subOp) {
-  return printBinaryOperation(emitter, subOp.getOperation(), "-");
+LogicalResult CppPrinter::printOperation(custom::SubOp subOp) {
+  return printBinaryOperation(subOp.getOperation(), "-");
 }
 
-static LogicalResult emitSwitchCase(CppEmitter &emitter,
-                                    raw_indented_ostream &os, Region &region) {
+LogicalResult CppPrinter::emitSwitchCase(raw_indented_ostream &os, Region &region) {
   for (Region::OpIterator iteratorOp = region.op_begin(), end = region.op_end();
        std::next(iteratorOp) != end; ++iteratorOp) {
     if (failed(emitter.emitOperation(*iteratorOp, /*trailingSemicolon=*/true))){
@@ -359,7 +351,7 @@ static LogicalResult emitSwitchCase(CppEmitter &emitter,
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::SwitchOp switchOp) {
+LogicalResult CppPrinter::printOperation(custom::SwitchOp switchOp) {
   raw_indented_ostream &os = emitter.ostream();
 
   os << "switch (";
@@ -372,7 +364,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::SwitchOp switch
     os << "\ncase " << std::get<0>(pair) << ": {\n";
     os.indent();
 
-    if (failed(emitSwitchCase(emitter, os, std::get<1>(pair)))){
+    if (failed(emitSwitchCase(os, std::get<1>(pair)))){
       return failure();
     }
 
@@ -382,7 +374,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::SwitchOp switch
   os << "\ndefault: {\n";
   os.indent();
 
-  if (failed(emitSwitchCase(emitter, os, switchOp.getDefaultRegion()))){
+  if (failed(emitSwitchCase(os, switchOp.getDefaultRegion()))){
     return failure();
   }
 
@@ -390,7 +382,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::SwitchOp switch
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::CmpOp cmpOp) {
+LogicalResult CppPrinter::printOperation(custom::CmpOp cmpOp) {
   StringRef binaryOperator;
 
   switch (cmpOp.getPredicate()) {
@@ -417,10 +409,10 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::CmpOp cmpOp) {
     break;
   }
 
-  return printBinaryOperation(emitter, cmpOp.getOperation(), binaryOperator);
+  return printBinaryOperation(cmpOp.getOperation(), binaryOperator);
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::ConditionalOp conditionalOp) {
+LogicalResult CppPrinter::printOperation(custom::ConditionalOp conditionalOp) {
   raw_ostream &os = emitter.ostream();
 
   if (failed(emitter.emitAssignPrefix(*conditionalOp))){
@@ -446,7 +438,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::ConditionalOp c
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::VerbatimOp verbatimOp) {
+LogicalResult CppPrinter::printOperation(custom::VerbatimOp verbatimOp) {
   raw_ostream &os = emitter.ostream();
 
   FailureOr<SmallVector<ReplacementItem>> items = verbatimOp.parseFormatString();
@@ -469,7 +461,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::VerbatimOp verb
   return success();
 }
 
-static LogicalResult printCallOperation(CppEmitter &emitter, Operation *callOp, StringRef callee) {
+LogicalResult CppPrinter::printCallOperation(Operation *callOp, StringRef callee) {
   if (failed(emitter.emitAssignPrefix(*callOp))){
     return failure();
   }
@@ -483,11 +475,11 @@ static LogicalResult printCallOperation(CppEmitter &emitter, Operation *callOp, 
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::CallOp callOp) {
-  return printCallOperation(emitter, callOp.getOperation(), callOp.getCallee());
+LogicalResult CppPrinter::printOperation(custom::CallOp callOp) {
+  return printCallOperation(callOp.getOperation(), callOp.getCallee());
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::CallOpaqueOp callOpaqueOp) {
+LogicalResult CppPrinter::printOperation(custom::CallOpaqueOp callOpaqueOp) {
   raw_ostream &os = emitter.ostream();
   Operation &op = *callOpaqueOp.getOperation();
 
@@ -538,7 +530,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::CallOpaqueOp ca
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::ApplyOp applyOp) {
+LogicalResult CppPrinter::printOperation(custom::ApplyOp applyOp) {
   raw_ostream &os = emitter.ostream();
   Operation &op = *applyOp.getOperation();
 
@@ -552,39 +544,39 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::ApplyOp applyOp
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::BitwiseAndOp bitwiseAndOp) {
-  return printBinaryOperation(emitter, bitwiseAndOp.getOperation(), "&");
+LogicalResult CppPrinter::printOperation(custom::BitwiseAndOp bitwiseAndOp) {
+  return printBinaryOperation(bitwiseAndOp.getOperation(), "&");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::BitwiseLeftShiftOp bitwiseLeftShiftOp) {
-  return printBinaryOperation(emitter, bitwiseLeftShiftOp.getOperation(), "<<");
+LogicalResult CppPrinter::printOperation(custom::BitwiseLeftShiftOp bitwiseLeftShiftOp) {
+  return printBinaryOperation(bitwiseLeftShiftOp.getOperation(), "<<");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::BitwiseNotOp bitwiseNotOp) {
-  return printUnaryOperation(emitter, bitwiseNotOp.getOperation(), "~");
+LogicalResult CppPrinter::printOperation(custom::BitwiseNotOp bitwiseNotOp) {
+  return printUnaryOperation(bitwiseNotOp.getOperation(), "~");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::BitwiseOrOp bitwiseOrOp) {
-  return printBinaryOperation(emitter, bitwiseOrOp.getOperation(), "|");
+LogicalResult CppPrinter::printOperation(custom::BitwiseOrOp bitwiseOrOp) {
+  return printBinaryOperation(bitwiseOrOp.getOperation(), "|");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::BitwiseRightShiftOp bitwiseRightShiftOp) {
-  return printBinaryOperation(emitter, bitwiseRightShiftOp.getOperation(), ">>");
+LogicalResult CppPrinter::printOperation(custom::BitwiseRightShiftOp bitwiseRightShiftOp) {
+  return printBinaryOperation(bitwiseRightShiftOp.getOperation(), ">>");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::BitwiseXorOp bitwiseXorOp) {
-  return printBinaryOperation(emitter, bitwiseXorOp.getOperation(), "^");
+LogicalResult CppPrinter::printOperation(custom::BitwiseXorOp bitwiseXorOp) {
+  return printBinaryOperation(bitwiseXorOp.getOperation(), "^");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::UnaryPlusOp unaryPlusOp) {
-  return printUnaryOperation(emitter, unaryPlusOp.getOperation(), "+");
+LogicalResult CppPrinter::printOperation(custom::UnaryPlusOp unaryPlusOp) {
+  return printUnaryOperation(unaryPlusOp.getOperation(), "+");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::UnaryMinusOp unaryMinusOp) {
-  return printUnaryOperation(emitter, unaryMinusOp.getOperation(), "-");
+LogicalResult CppPrinter::printOperation(custom::UnaryMinusOp unaryMinusOp) {
+  return printUnaryOperation(unaryMinusOp.getOperation(), "-");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::CastOp castOp) {
+LogicalResult CppPrinter::printOperation(custom::CastOp castOp) {
   raw_ostream &os = emitter.ostream();
   Operation &op = *castOp.getOperation();
 
@@ -601,7 +593,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::CastOp castOp) 
   return emitter.emitOperand(castOp.getOperand());
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::ExpressionOp expressionOp) {
+LogicalResult CppPrinter::printOperation(custom::ExpressionOp expressionOp) {
   if (shouldBeInlined(expressionOp)){
     return success();
   }
@@ -615,19 +607,19 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::ExpressionOp ex
   return emitter.emitExpression(expressionOp);
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::LogicalAndOp logicalAndOp) {
-  return printBinaryOperation(emitter, logicalAndOp.getOperation(), "&&");
+LogicalResult CppPrinter::printOperation(custom::LogicalAndOp logicalAndOp) {
+  return printBinaryOperation(logicalAndOp.getOperation(), "&&");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::LogicalNotOp logicalNotOp) {
-  return printUnaryOperation(emitter, logicalNotOp.getOperation(), "!");
+LogicalResult CppPrinter::printOperation(custom::LogicalNotOp logicalNotOp) {
+  return printUnaryOperation(logicalNotOp.getOperation(), "!");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::LogicalOrOp logicalOrOp) {
-  return printBinaryOperation(emitter, logicalOrOp.getOperation(), "||");
+LogicalResult CppPrinter::printOperation(custom::LogicalOrOp logicalOrOp) {
+  return printBinaryOperation(logicalOrOp.getOperation(), "||");
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::ForOp forOp) {
+LogicalResult CppPrinter::printOperation(custom::ForOp forOp) {
   raw_indented_ostream &os = emitter.ostream();
 
   auto requiresParentheses = [&](Value value) {
@@ -690,10 +682,10 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::ForOp forOp) {
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::IfOp ifOp) {
+LogicalResult CppPrinter::printOperation(custom::IfOp ifOp) {
   raw_indented_ostream &os = emitter.ostream();
 
-  auto emitAllExceptLast = [&emitter](Region &region) {
+  auto emitAllExceptLast = [this](Region &region) {
     Region::OpIterator it = region.op_begin(), end = region.op_end();
     for (; std::next(it) != end; ++it) {
       if (failed(emitter.emitOperation(*it, /*trailingSemicolon=*/true))){
@@ -728,7 +720,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::IfOp ifOp) {
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::ReturnOp returnOp) {
+LogicalResult CppPrinter::printOperation(custom::ReturnOp returnOp) {
   raw_ostream &os = emitter.ostream();
   os << "return";
   if (returnOp.getNumOperands() == 0){
@@ -742,7 +734,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::ReturnOp return
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, ModuleOp moduleOp) {
+LogicalResult CppPrinter::printOperation(ModuleOp moduleOp) {
   CppEmitter::Scope scope(emitter);
 
   for (Operation &op : moduleOp) {
@@ -753,7 +745,7 @@ static LogicalResult printOperation(CppEmitter &emitter, ModuleOp moduleOp) {
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, FileOp file) {
+LogicalResult CppPrinter::printOperation(FileOp file) {
   if (!emitter.shouldEmitFile(file)){
     return success();
   }
@@ -768,9 +760,7 @@ static LogicalResult printOperation(CppEmitter &emitter, FileOp file) {
   return success();
 }
 
-static LogicalResult printFunctionArgs(CppEmitter &emitter,
-                                       Operation *functionOp,
-                                       ArrayRef<Type> arguments) {
+LogicalResult CppPrinter::printFunctionArgs(Operation *functionOp, ArrayRef<Type> arguments) {
   raw_indented_ostream &os = emitter.ostream();
 
   return interleaveCommaWithError(arguments, os, [&](Type arg) -> LogicalResult {
@@ -778,9 +768,7 @@ static LogicalResult printFunctionArgs(CppEmitter &emitter,
       });
 }
 
-static LogicalResult printFunctionArgs(CppEmitter &emitter,
-                                       Operation *functionOp,
-                                       Region::BlockArgListType arguments) {
+LogicalResult CppPrinter::printFunctionArgs(Operation *functionOp, Region::BlockArgListType arguments) {
   raw_indented_ostream &os = emitter.ostream();
 
   return interleaveCommaWithError(
@@ -790,9 +778,7 @@ static LogicalResult printFunctionArgs(CppEmitter &emitter,
       });
 }
 
-static LogicalResult printFunctionBody(CppEmitter &emitter,
-                                       Operation *functionOp,
-                                       Region::BlockListType &blocks) {
+LogicalResult CppPrinter::printFunctionBody(Operation *functionOp, Region::BlockListType &blocks) {
   raw_indented_ostream &os = emitter.ostream();
   os.indent();
 
@@ -853,7 +839,7 @@ static LogicalResult printFunctionBody(CppEmitter &emitter,
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::FuncOp functionOp) {
+LogicalResult CppPrinter::printOperation(custom::FuncOp functionOp) {
   if (!emitter.shouldDeclareVariablesAtTop() && functionOp.getBlocks().size() > 1) {
     return functionOp.emitOpError("with multiple blocks needs variables declared at top");
   }
@@ -872,24 +858,24 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::FuncOp function
   os << " " << functionOp.getName() << "(";
   Operation *operation = functionOp.getOperation();
   if (functionOp.isExternal()) {
-    if (failed(printFunctionArgs(emitter, operation, functionOp.getArgumentTypes()))){
+    if (failed(printFunctionArgs(operation, functionOp.getArgumentTypes()))){
       return failure();
     }
     os << ");";
     return success();
   }
-  if (failed(printFunctionArgs(emitter, operation, functionOp.getArguments()))){
+  if (failed(printFunctionArgs(operation, functionOp.getArguments()))){
     return failure();
   }
   os << ") {\n";
-  if (failed(printFunctionBody(emitter, operation, functionOp.getBlocks()))){
+  if (failed(printFunctionBody(operation, functionOp.getBlocks()))){
     return failure();
   }
   os << "}\n";
   return success();
 }
 
-static LogicalResult printOperation(CppEmitter &emitter, custom::DeclareFuncOp declareFuncOp) {
+LogicalResult CppPrinter::printOperation(custom::DeclareFuncOp declareFuncOp) {
   CppEmitter::Scope scope(emitter);
   raw_indented_ostream &os = emitter.ostream();
 
@@ -911,7 +897,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::DeclareFuncOp d
   }
   os << " " << functionOp.getName() << "(";
   Operation *operation = functionOp.getOperation();
-  if (failed(printFunctionArgs(emitter, operation, functionOp.getArguments()))){
+  if (failed(printFunctionArgs(operation, functionOp.getArguments()))){
     return failure();
   }
   os << ");";
@@ -919,7 +905,7 @@ static LogicalResult printOperation(CppEmitter &emitter, custom::DeclareFuncOp d
 }
 
 CppEmitter::CppEmitter(raw_ostream &os, bool declareVariablesAtTop, StringRef fileId)
-    : os(os), declareVariablesAtTop(declareVariablesAtTop), fileId(fileId.str()) {
+    : os(os), declareVariablesAtTop(declareVariablesAtTop), fileId(fileId.str()), printer(*this) {
   valueInScopeCount.push(0);
   labelInScopeCount.push(0);
 }
@@ -1235,6 +1221,13 @@ LogicalResult CppEmitter::emitVariableAssignment(OpResult result) {
   return success();
 }
 
+LogicalResult CppEmitter::emitVariableMaybeDeclaration(OpResult result, bool trailingSemicolon){
+  if (!shouldDeclareVariablesAtTop()){
+    return emitVariableDeclaration(result, trailingSemicolon);
+  }
+  return success();
+}
+
 LogicalResult CppEmitter::emitVariableDeclaration(OpResult result, bool trailingSemicolon) {
   if (hasDeferredEmission(result.getDefiningOp())){
     return success();
@@ -1331,7 +1324,7 @@ LogicalResult CppEmitter::emitLabel(Block &block) {
 LogicalResult CppEmitter::emitOperation(Operation &op, bool trailingSemicolon) {
   LogicalResult status =
       llvm::TypeSwitch<Operation *, LogicalResult>(&op)
-          .Case<ModuleOp>([&](auto op) { return printOperation(*this, op); })
+          .Case<ModuleOp>([&](auto op) { return printer.printOperation(op); })
           .Case<custom::GetProgramIdOp, custom::LoadexOp, custom::StoreexOp,
                 custom::MinSIOp,
                 custom::AddOp, custom::ApplyOp, custom::AssignOp,
@@ -1346,7 +1339,7 @@ LogicalResult CppEmitter::emitOperation(Operation &op, bool trailingSemicolon) {
                 custom::LogicalOrOp, custom::MulOp, custom::RemOp, custom::ReturnOp,
                 custom::SubOp, custom::SwitchOp, custom::UnaryMinusOp,
                 custom::UnaryPlusOp, custom::VariableOp, custom::VerbatimOp>(
-              [&](auto op) { return printOperation(*this, op); })
+              [&](auto op) { return printer.printOperation(op); })
           .Case<custom::GetGlobalOp>([&](auto op) {
             cacheDeferredOpResult(op.getResult(), op.getName());
             return success();

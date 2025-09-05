@@ -111,12 +111,12 @@ int main (int argc, char** argv) {
   }
 
   auto cpp_file = std::filesystem::current_path() / "out.cpp";
-  mlir::custom::FilePrinter filePrinter(cpp_file.c_str(), false);
+  mlir::custom::FilePrinter filePrinter(cpp_file.c_str(), true);
   if (filePrinter.run(*module).failed()){
     llvm::outs() << "codegen code error!\n";
   }
 
-  mlir::custom::StringPrinter stringPrinter("", false);
+  mlir::custom::StringPrinter stringPrinter("", true);
   if (stringPrinter.run(*module).failed()){
     llvm::outs() << "codegen module error!\n";
   }
