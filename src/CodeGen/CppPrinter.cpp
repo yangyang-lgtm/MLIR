@@ -2,6 +2,8 @@
 // Created by ubuntu on 2025/9/3.
 //
 
+#include <vector>
+
 #include "CodeGen/CppPrinter.h"
 
 #include "llvm/ADT/TypeSwitch.h"
@@ -49,17 +51,12 @@ inline LogicalResult interleaveCommaWithError(const Container &c,
 
 static FailureOr<int> getOperatorPrecedence(Operation *operation) {
   return llvm::TypeSwitch<Operation *, FailureOr<int>>(operation)
-      .Case<custom::AddOp>([&](auto op) { return 12; })
-      .Case<custom::ApplyOp>([&](auto op) { return 15; })
-      .Case<custom::BitwiseAndOp>([&](auto op) { return 7; })
-      .Case<custom::BitwiseLeftShiftOp>([&](auto op) { return 11; })
-      .Case<custom::BitwiseNotOp>([&](auto op) { return 15; })
+      .Case<custom::ConditionalOp>([&](auto op) { return 2; })
+      .Case<custom::LogicalOrOp>([&](auto op) { return 3; })
+      .Case<custom::LogicalAndOp>([&](auto op) { return 4; })
       .Case<custom::BitwiseOrOp>([&](auto op) { return 5; })
-      .Case<custom::BitwiseRightShiftOp>([&](auto op) { return 11; })
       .Case<custom::BitwiseXorOp>([&](auto op) { return 6; })
-      .Case<custom::CallOp>([&](auto op) { return 16; })
-      .Case<custom::CallOpaqueOp>([&](auto op) { return 16; })
-      .Case<custom::CastOp>([&](auto op) { return 15; })
+      .Case<custom::BitwiseAndOp>([&](auto op) { return 7; })
       .Case<custom::CmpOp>([&](auto op) -> FailureOr<int> {
         switch (op.getPredicate()) {
         case custom::CmpPredicate::eq:
@@ -75,17 +72,22 @@ static FailureOr<int> getOperatorPrecedence(Operation *operation) {
         default: return op->emitError("unsupported cmp predicate");
         }
       })
-      .Case<custom::ConditionalOp>([&](auto op) { return 2; })
+      .Case<custom::BitwiseRightShiftOp>([&](auto op) { return 11; })
+      .Case<custom::BitwiseLeftShiftOp>([&](auto op) { return 11; })
+      .Case<custom::AddOp>([&](auto op) { return 12; })
+      .Case<custom::SubOp>([&](auto op) { return 12; })
       .Case<custom::DivOp>([&](auto op) { return 13; })
-      .Case<custom::LoadOp>([&](auto op) { return 16; })
-      .Case<custom::LogicalAndOp>([&](auto op) { return 4; })
-      .Case<custom::LogicalNotOp>([&](auto op) { return 15; })
-      .Case<custom::LogicalOrOp>([&](auto op) { return 3; })
       .Case<custom::MulOp>([&](auto op) { return 13; })
       .Case<custom::RemOp>([&](auto op) { return 13; })
-      .Case<custom::SubOp>([&](auto op) { return 12; })
+      .Case<custom::LogicalNotOp>([&](auto op) { return 15; })
       .Case<custom::UnaryMinusOp>([&](auto op) { return 15; })
       .Case<custom::UnaryPlusOp>([&](auto op) { return 15; })
+      .Case<custom::CastOp>([&](auto op) { return 15; })
+      .Case<custom::ApplyOp>([&](auto op) { return 15; })
+      .Case<custom::BitwiseNotOp>([&](auto op) { return 15; })
+      .Case<custom::CallOp>([&](auto op) { return 16; })
+      .Case<custom::CallOpaqueOp>([&](auto op) { return 16; })
+      .Case<custom::LoadOp>([&](auto op) { return 16; })
       .Default([](auto op) { return op->emitError("unsupported operation"); });
 }
 
@@ -246,19 +248,6 @@ LogicalResult CppPrinter::printOperation(custom::LoadOp loadOp) {
   return emitter.emitOperand(loadOp.getOperand());
 }
 
-// LogicalResult CppPrinter::printTensorBinaryOperation(Operation *operation, StringRef binaryOperator){
-//   raw_ostream &os = emitter.ostream();
-//
-//   // static const std::unordered_map<std::string, std::string> operatorMapper{
-//   //   {"+", "add"}, {"-", "sub"}, {"*", "mul"}, {"/", "div"}
-//   // };
-//
-//   if (failed(emitter.emitAssignPrefix(*operation))){
-//     return failure();
-//   }
-//
-// }
-
 LogicalResult CppPrinter::printVecBinaryOperation(Operation *operation, StringRef binaryOperator){
   raw_ostream &os = emitter.ostream();
   auto result = operation->getResult(0);
@@ -294,10 +283,6 @@ LogicalResult CppPrinter::printVecBinaryOperation(Operation *operation, StringRe
 }
 
 LogicalResult CppPrinter::printBinaryOperation(Operation *operation, StringRef binaryOperator) {
-  // if (isa<custom::CTensorType>(operation->getResult(0).getType())){
-  //   return printTensorBinaryOperation(operation, binaryOperator);
-  // }
-
   if (isa<custom::ArrayType>(operation->getResult(0).getType())){
     return printVecBinaryOperation(operation, binaryOperator);
   }
@@ -400,33 +385,11 @@ LogicalResult CppPrinter::printOperation(custom::SwitchOp switchOp) {
 }
 
 LogicalResult CppPrinter::printOperation(custom::CmpOp cmpOp) {
-  StringRef binaryOperator;
+  static const std::vector<std::string> cmpPredicateVec{
+    "==", "!=", "<", "<=", ">", ">=", "<=>"
+  };
 
-  switch (cmpOp.getPredicate()) {
-  case custom::CmpPredicate::eq:
-    binaryOperator = "==";
-    break;
-  case custom::CmpPredicate::ne:
-    binaryOperator = "!=";
-    break;
-  case custom::CmpPredicate::lt:
-    binaryOperator = "<";
-    break;
-  case custom::CmpPredicate::le:
-    binaryOperator = "<=";
-    break;
-  case custom::CmpPredicate::gt:
-    binaryOperator = ">";
-    break;
-  case custom::CmpPredicate::ge:
-    binaryOperator = ">=";
-    break;
-  case custom::CmpPredicate::three_way:
-    binaryOperator = "<=>";
-    break;
-  }
-
-  return printBinaryOperation(cmpOp.getOperation(), binaryOperator);
+  return printBinaryOperation(cmpOp.getOperation(), cmpPredicateVec[static_cast<uint64_t>(cmpOp.getPredicate())]);
 }
 
 LogicalResult CppPrinter::printOperation(custom::ConditionalOp conditionalOp) {
@@ -1309,7 +1272,7 @@ LogicalResult CppEmitter::emitAssignPrefix(Operation &op) {
       if (failed(emitVariableDeclaration(result, /*trailingSemicolon=*/false))){
         return failure();
       }
-      os << " = ";
+      os << ";" << getOrCreateName(result) << " = ";
     }
     break;
   }

@@ -73,13 +73,14 @@ int main (int argc, char** argv) {
     llvm::outs() << "print module error!\n";
   }
 
+  bool declareVariablesAtTop = false;
   auto cpp_file = std::filesystem::current_path() / "out.cpp";
-  mlir::custom::FilePrinter filePrinter(cpp_file.c_str(), true);
+  mlir::custom::FilePrinter filePrinter(cpp_file.c_str(), declareVariablesAtTop);
   if (filePrinter.run(*module).failed()){
     llvm::outs() << "codegen code error!\n";
   }
 
-  mlir::custom::StringPrinter stringPrinter("", true);
+  mlir::custom::StringPrinter stringPrinter("", declareVariablesAtTop);
   if (stringPrinter.run(*module).failed()){
     llvm::outs() << "codegen module error!\n";
   }
