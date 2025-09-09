@@ -4,6 +4,7 @@
 #include <memory>
 #include <random>
 #include <chrono>
+#include <limits>
 
 #define min(a, b) ((a) > (b)) ? (b) : (a)
 
@@ -83,28 +84,45 @@ void store(T* dst, const Tensor<T>& src, int32_t len){
   copy(src.impl->get(), dst, len);
 }
 
+template<typename T, typename Fn>
+void for_each(const Tensor<T>& a, const Tensor<T>& b, Tensor<T>& c, Fn call){
+  for (auto i = 0; i < c.impl->numel; ++i){
+    c[i] = call(a[i], b[i]);
+  }
+}
+
 template<typename T>
 Tensor<T> operator+(const Tensor<T>& a, const Tensor<T>& b){
   Tensor<T> out(a.impl->shape);
-  for (auto i = 0; i < out.impl->numel; ++i){
-    out[i] = a[i] + b[i];
-  }
+  for_each(a, b, out, [](T a, T b){ return a + b; });
   return out;
 }
 
 template<typename T>
 Tensor<T> operator-(const Tensor<T>& a, const Tensor<T>& b){
   Tensor<T> out(a.impl->shape);
-  for (auto i = 0; i < out.impl->numel; ++i){
-    out[i] = a[i] - b[i];
-  }
+  for_each(a, b, out, [](T a, T b){ return a - b; });
+  return out;
+}
+
+template<typename T>
+Tensor<T> operator*(const Tensor<T>& a, const Tensor<T>& b){
+  Tensor<T> out(a.impl->shape);
+  for_each(a, b, out, [](T a, T b){ return a * b; });
+  return out;
+}
+
+template<typename T>
+Tensor<T> operator/(const Tensor<T>& a, const Tensor<T>& b){
+  Tensor<T> out(a.impl->shape);
+  for_each(a, b, out, [](T a, T b){ return a / b; });
   return out;
 }
 
 template <typename T>
 void init(Tensor<T>& in){
   static std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
-  std::uniform_int_distribution<int> distribution(-10086, 10086);
+  std::uniform_int_distribution<int> distribution(-100860, 100860);
   for (auto i = 0; i < in.impl->numel; ++i){
     in[i] = (T)distribution(generator) / 10000;
   }

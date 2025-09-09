@@ -10,7 +10,14 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/IR/PatternMatch.h"
 
+namespace mlir{
+class TypeConverter;
+class RewritePatternSet;
+}
+
 namespace mlir::custom{
+
+void populateTritonToCustomPatterns(TypeConverter &typeConverter, RewritePatternSet &patterns);
 
 #define GEN_PASS_DECL_CONVERTTRITONTOCUSTOM
 #include "Conversion/ConvertToCustomPass.h.inc"
