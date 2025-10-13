@@ -9,15 +9,7 @@
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 
-#include "CustomDialect/Custom.h"
-#include "TritonDialect/Dialect.h"
-
-#include "Conversion/TritonToCustomPass.h"
-#include "Conversion/ArithToCustomPass.h"
-#include "Conversion/SCFToCustomPass.h"
-
-#include "CodeGen/CppPrinter.h"
-#include "Execute/execute.h"
+#include "triton/Dialect/Triton/IR/Dialect.h"
 
 #include "utils.h"
 #include "config.h"
@@ -31,9 +23,8 @@ static void init_context(mlir::MLIRContext& context){
   add_dialects<
     mlir::func::FuncDialect,
     mlir::scf::SCFDialect,
-    mlir::triton::TritonDialect,
     mlir::arith::ArithDialect,
-    mlir::custom::CustomDialect
+    mlir::triton::TritonDialect
   >(context);
 }
 
@@ -57,10 +48,6 @@ int main (int argc, char** argv) {
   }
 
   mlir::PassManager manager(&context);
-  manager.addPass(mlir::custom::createConvertTritonToCustom());
-  manager.addPass(mlir::custom::createConvertArithToCustom());
-  manager.addPass(mlir::custom::createConvertSCFToCustom());
-
   manager.addPass(mlir::createCanonicalizerPass());
 
   if (manager.run(*module).failed()){
@@ -72,24 +59,5 @@ int main (int argc, char** argv) {
   if (mlir::utils::file::PrintToFile(module.get(), file.c_str()).failed()) {
     llvm::outs() << "print module error!\n";
   }
-
-  bool declareVariablesAtTop = false;
-  auto cpp_file = std::filesystem::current_path() / "out.cpp";
-  mlir::custom::FilePrinter filePrinter(cpp_file.c_str(), declareVariablesAtTop);
-  if (filePrinter.run(*module).failed()){
-    llvm::outs() << "codegen code error!\n";
-  }
-
-  mlir::custom::StringPrinter stringPrinter("", declareVariablesAtTop);
-  if (stringPrinter.run(*module).failed()){
-    llvm::outs() << "codegen module error!\n";
-  }
-
-  auto path = genSourcePath(mlirPath);
-  mlir::custom::Executor executor(
-    stringPrinter.get_buffer_or_path().c_str(), path.c_str());
-
-  executor.run(false);
-
   return 0;
 }

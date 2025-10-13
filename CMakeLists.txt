@@ -91,7 +91,7 @@ set(LINK_LIBRARIES_DIRS
 include_directories(${INCLUDE_DIRS})
 link_directories(${LINK_LIBRARIES_DIRS})
 
-add_subdirectory(include/CustomDialect)
+add_subdirectory(include)
 add_subdirectory(src)
 
 get_property(triton_libs GLOBAL PROPERTY TRITON_LIBS)
@@ -111,16 +111,14 @@ set(TRITON_LIBRARIES
   MLIRSCFToControlFlow
   MLIRIndexToLLVM
 
-  # LLVM
-  LLVMPasses
-)
+	MLIRLinalgTransforms
+	MLIRTensorTransforms
+	MLIRArithTransforms
+	MLIRSCFTransforms
+    MLIRBufferizationDialect
 
-# custom
-set(CUSTOM_LIBS
-  CustomDialect
-  ConvertToCustom
-  TranslateToCpp
-  Executor
+	# LLVM
+  LLVMPasses
 )
 
 configure_file(
@@ -131,9 +129,7 @@ configure_file(
 
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE
+	"-Wl,--whole-archive"
   ${TRITON_LIBRARIES}
-  # custom
-  "-Wl,--whole-archive"
-  ${CUSTOM_LIBS}
   "-Wl,--no-whole-archive"
 )
