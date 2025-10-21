@@ -1384,7 +1384,8 @@ def TT_LoadexOp : TT_Op<"load_ex", [MemoryEffects<[MemRead<GlobalMemory>]>, Decl
       ins
       TT_PtrType:$ptr,
       I32Attr:$tensor_size,
-      TT_Int:$valid_size
+      TT_Int:$valid_size,
+      Optional<TT_Type>:$other
     );
 
     let results = (outs TT_Tensor:$result);

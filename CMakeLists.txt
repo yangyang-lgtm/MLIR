@@ -23,7 +23,8 @@ if (NOT DEFINED CLANG_CMAKE_DIR)
   set(CLANG_BIN "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/bin")
 endif ()
 
-set(CODEGEN_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/resources")
+set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resources")
+set(CASES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/cases")
 
 message(STATUS "LLVM_CMAKE_DIR: ${LLVM_CMAKE_DIR}")
 message(STATUS "MLIR_CMAKE_DIR: ${MLIR_CMAKE_DIR}")
@@ -96,6 +97,10 @@ add_subdirectory(src)
 
 get_property(triton_libs GLOBAL PROPERTY TRITON_LIBS)
 get_property(triton_plugins GLOBAL PROPERTY TRITON_PLUGINS)
+
+message(STATUS "TRITON_LIBS: ${triton_libs}")
+message(STATUS "TRITON_PLUGINS: ${triton_plugins}")
+
 set(TRITON_LIBRARIES
   ${triton_libs}
   ${triton_plugins}
@@ -115,7 +120,7 @@ set(TRITON_LIBRARIES
 	MLIRTensorTransforms
 	MLIRArithTransforms
 	MLIRSCFTransforms
-    MLIRBufferizationDialect
+  MLIRBufferizationDialect
 
 	# LLVM
   LLVMPasses
@@ -133,3 +138,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   ${TRITON_LIBRARIES}
   "-Wl,--no-whole-archive"
 )
+
+add_subdirectory(tests)

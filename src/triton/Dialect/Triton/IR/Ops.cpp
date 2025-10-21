@@ -1376,7 +1376,7 @@ void LoadexOp::build(OpBuilder &builder, OperationState &state,
   SmallVector<Type> inferredReturnTypes;
   auto dst_tensor_dtype = cast<PointerType>(ptr.getType()).getPointeeType();
   inferredReturnTypes.push_back(RankedTensorType::get({tensor_size}, dst_tensor_dtype));
-  LoadexOp::build(builder, state, inferredReturnTypes, ptr, tensor_size, valid_size);
+  LoadexOp::build(builder, state, inferredReturnTypes, ptr, tensor_size, valid_size, /* other */{});
 }
 
 LogicalResult LoadexOp::inferReturnTypes(
