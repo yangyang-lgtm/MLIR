@@ -10,7 +10,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include "mlir/Pass/PassManager.h"
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 
@@ -101,6 +100,6 @@ int main() {
       throw std::runtime_error(std::string() + srcPath.c_str() + " not same with " + dstPath.c_str());
     }
   }
-
+  llvm::outs() << "check success\n";
   return 0;
 }
