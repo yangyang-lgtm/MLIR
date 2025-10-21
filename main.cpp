@@ -27,7 +27,7 @@ static void init_context(mlir::MLIRContext& context){
 
 int main (int argc, char** argv) {
   if (argc != 2) {
-    llvm::outs() << "run as : ." << argv[0] << " xxx.mlir\n";
+    llvm::outs() << "run as : ." << argv[0] << " xxx.mlir, which is in " << RESOURCES_PATH << "\n";
     return 0;
   }
 
