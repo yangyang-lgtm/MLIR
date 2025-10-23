@@ -1,5 +1,6 @@
 add_triton_library(TritonIR
   Dialect.cpp
+  DiscardableAttributes.cpp
   Ops.cpp
   Traits.cpp
   Types.cpp

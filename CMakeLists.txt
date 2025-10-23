@@ -25,6 +25,7 @@ endif ()
 
 set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resources")
 set(CASES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/cases")
+set(MLIR_BIN "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/bin")
 
 message(STATUS "LLVM_CMAKE_DIR: ${LLVM_CMAKE_DIR}")
 message(STATUS "MLIR_CMAKE_DIR: ${MLIR_CMAKE_DIR}")
@@ -138,5 +139,3 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   ${TRITON_LIBRARIES}
   "-Wl,--no-whole-archive"
 )
-
-add_subdirectory(tests)
