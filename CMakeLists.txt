@@ -139,3 +139,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   ${TRITON_LIBRARIES}
   "-Wl,--no-whole-archive"
 )
+
+add_subdirectory(tests)
