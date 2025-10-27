@@ -6,8 +6,9 @@
 
 #include "llvm/ADT/TypeSwitch.h"
 #include "triton-shared/Analysis/OpFoldResultUtils.h"
+#include "triton-shared/Analysis/MaskAnalysis.h"
 
-namespace mlir {
+namespace mlir::test {
 
 struct MaskState {
   OpFoldResult start;
@@ -152,7 +153,7 @@ struct MaskState {
       // r.scalar l.start l.end
       // 所以 res.end = max(l.start, min(r.scalar, l.end))
       auto newEnd = minOFRs(lhsState.end, rhsState.scalar, loc, builder);
-      newEnd = maxOFRs(lhsState.start, newEnd, loc, builder);
+      newEnd = maxOFRs(newEnd, lhsState.start, loc, builder);
       newDim = subOFRs(newEnd, lhsState.start, loc, builder);
     } else {
       // load(ptr, mask=(l >= 0))
@@ -231,6 +232,24 @@ static LogicalResult rewriteLoadOp(triton::LoadOp op) {
   }
   return success();
 }
+
+static LogicalResult rewriteWalk(ModuleOp rootOp) {
+  rootOp->walk<WalkOrder::PreOrder>([&](Operation *op) {
+    if (op == rootOp) {
+      return WalkResult::advance();
+    }
+    return llvm::TypeSwitch<Operation *, WalkResult>(op)
+      .Case<triton::LoadOp>([&](auto load) {
+          if (test::rewriteLoadOp(load).failed()) {
+            return WalkResult::advance();
+          }
+          return WalkResult::skip();
+        })
+      .Default([&](auto) { return WalkResult::advance(); });
+  });
+  return success();
+}
+
 }
 
 TEST(MaskAnalysis) {
@@ -239,18 +258,36 @@ TEST(MaskAnalysis) {
 
   auto mlirPath = std::string(RESOURCES_PATH) + "/triton.mlir";
   mlir::OwningOpRef<mlir::ModuleOp> module;
-  if (mlir::utils::file::ParseFile<mlir::ModuleOp>(context, module, mlirPath.c_str()).failed()){
-    llvm::outs() << "parse ir string failed!\n";
-  }
 
-  auto rootOp = (*module);
-  module->walk<mlir::WalkOrder::PreOrder>([&](mlir::Operation *op) {
-    if (op == rootOp) {
+  ASSERT_TRUE(mlir::utils::file::ParseFile<mlir::ModuleOp>(context, module, mlirPath.c_str()).succeeded());
+
+  auto moduleClone = module->clone();
+
+  // test
+  ASSERT_TRUE(mlir::test::rewriteWalk(*module).succeeded());
+
+  // mlir triton
+  auto rewriteLoadOp = [&](mlir::triton::LoadOp op) {
+    mlir::triton::MaskState mstate(/*useUnsafeMask*/false);
+    mlir::OpBuilder builder(op);
+    auto mask = op.getMask();
+    auto loc = op.getLoc();
+
+    if (mask) {
+      if (mstate.parse(mask, loc, builder).failed()) {
+        return mlir::failure();
+      }
+    }
+    return mlir::success();
+  };
+
+  moduleClone->walk<mlir::WalkOrder::PreOrder>([&](mlir::Operation *op) {
+    if (op == moduleClone) {
       return mlir::WalkResult::advance();
     }
     return llvm::TypeSwitch<mlir::Operation *, mlir::WalkResult>(op)
       .Case<mlir::triton::LoadOp>([&](auto load) {
-          if (mlir::rewriteLoadOp(load).failed()) {
+          if (rewriteLoadOp(load).failed()) {
             return mlir::WalkResult::advance();
           }
           return mlir::WalkResult::skip();
@@ -258,5 +295,5 @@ TEST(MaskAnalysis) {
       .Default([&](auto) { return mlir::WalkResult::advance(); });
   });
 
-  module->dump();
+  ASSERT_SAME_MODULE(*module, moduleClone);
 }

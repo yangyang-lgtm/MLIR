@@ -34,7 +34,11 @@ struct TestEntry final {
     for (const auto& test_case : cases_) {
       std::cout << "-------------------------- run test " << ++idx << " : " << test_case.first << "--------------------------" << std::endl;
       auto start = std::chrono::high_resolution_clock::now();
-      test_case.second->run_test(argc, argv);
+      try {
+        test_case.second->run_test(argc, argv);
+      } catch (const std::runtime_error& e) {
+        throw std::runtime_error(test_case.first + " error: " + e.what());
+      }
       auto end = std::chrono::high_resolution_clock::now();
       auto elapsed_ms = std::chrono::duration<double, std::milli>(end - start).count();
       std::cout << "-------------------------- test : "<< test_case.first << " done : " << elapsed_ms << " ms --------------------------" << std::endl;
@@ -47,13 +51,27 @@ private:
 
 inline thread_local TestEntry entry;
 
-#define TEST(name)                                                \
-struct Case##name : public TestBase {                             \
-void run_test(int argc, char **argv) override;                  \
-};                                                                \
-static auto i_##name = entry.register_case<Case##name>(#name);    \
+#define TEST(name)                                             \
+struct Case##name : public TestBase {                          \
+void run_test(int argc, char **argv) override;                 \
+};                                                             \
+static auto i_##name = entry.register_case<Case##name>(#name); \
 void Case##name::run_test(int argc, char **argv)
 
+#define ASSERT_TRUE(cond)            \
+{                                    \
+  if (!(cond)) {                     \
+    throw std::runtime_error(#cond); \
+  }                                  \
+}
+
+#define ASSERT_SAME_MODULE(mod0, mod1)                                                 \
+{                                                                                      \
+  std::string m0, m1;                                                                  \
+  ASSERT_TRUE(mlir::utils::file::PrintToString<mlir::ModuleOp>(mod0, m0).succeeded()); \
+  ASSERT_TRUE(mlir::utils::file::PrintToString<mlir::ModuleOp>(mod1, m1).succeeded()); \
+  ASSERT_TRUE(m0 == m1);                                                               \
+}
 
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/Linalg/IR/Linalg.h"
