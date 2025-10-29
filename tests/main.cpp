@@ -5,8 +5,13 @@
 #include "TestUtils.h"
 
 int main(int argc, char** argv) {
-  entry.apply(argc, argv);
+  get_test_entry().apply(argc, argv);
   return 0;
+}
+
+TestEntry& get_test_entry() {
+  static TestEntry entry;
+  return entry;
 }
 
 template<typename... Ts>

@@ -32,16 +32,16 @@ struct TestEntry final {
   void apply(int argc, char **argv) {
     size_t idx = 0;
     for (const auto& test_case : cases_) {
-      std::cout << "-------------------------- run test " << ++idx << " : " << test_case.first << "--------------------------" << std::endl;
-      auto start = std::chrono::high_resolution_clock::now();
       try {
+        std::cout << "-------------------------- run test " << ++idx << " : " << test_case.first << "--------------------------" << std::endl;
+        auto start = std::chrono::high_resolution_clock::now();
         test_case.second->run_test(argc, argv);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto elapsed_ms = std::chrono::duration<double, std::milli>(end - start).count();
+        std::cout << "-------------------------- test : "<< test_case.first << " done : " << elapsed_ms << " ms --------------------------" << std::endl;
       } catch (const std::runtime_error& e) {
         throw std::runtime_error(test_case.first + " error: " + e.what());
       }
-      auto end = std::chrono::high_resolution_clock::now();
-      auto elapsed_ms = std::chrono::duration<double, std::milli>(end - start).count();
-      std::cout << "-------------------------- test : "<< test_case.first << " done : " << elapsed_ms << " ms --------------------------" << std::endl;
     }
   }
 
@@ -49,28 +49,36 @@ private:
   case_vec_t cases_;
 };
 
-inline thread_local TestEntry entry;
+TestEntry& get_test_entry();
 
-#define TEST(name)                                             \
-struct Case##name : public TestBase {                          \
-void run_test(int argc, char **argv) override;                 \
-};                                                             \
-static auto i_##name = entry.register_case<Case##name>(#name); \
+#define TEST(name)                                                        \
+struct Case##name : public TestBase {                                     \
+void run_test(int argc, char **argv) override;                            \
+};                                                                        \
+static auto i_##name = get_test_entry().register_case<Case##name>(#name); \
 void Case##name::run_test(int argc, char **argv)
 
-#define ASSERT_TRUE(cond)            \
-{                                    \
-  if (!(cond)) {                     \
-    throw std::runtime_error(#cond); \
-  }                                  \
+#define ASSERT_MSG(msg) (std::string((msg)) + std::string(__FILE__) + ": " + std::to_string(__LINE__))
+
+#define ASSERT_TRUE(cond)                                                                                  \
+{                                                                                                          \
+  if (!(cond)) {                                                                                           \
+    throw std::runtime_error(ASSERT_MSG("assert error at: "));                                             \
+  }                                                                                                        \
 }
 
-#define ASSERT_SAME_MODULE(mod0, mod1)                                                 \
-{                                                                                      \
-  std::string m0, m1;                                                                  \
-  ASSERT_TRUE(mlir::utils::file::PrintToString<mlir::ModuleOp>(mod0, m0).succeeded()); \
-  ASSERT_TRUE(mlir::utils::file::PrintToString<mlir::ModuleOp>(mod1, m1).succeeded()); \
-  ASSERT_TRUE(m0 == m1);                                                               \
+#define ASSERT_SAME_MODULE(mod0, mod1)                                                                                  \
+{                                                                                                                       \
+  std::string m0, m1;                                                                                                   \
+  if (mlir::utils::file::PrintToString<mlir::ModuleOp>(mod0, m0).failed()) {                                            \
+    throw std::runtime_error(ASSERT_MSG(std::string("PrintToString ") + #mod0 + " failed while assert same module: ")); \
+  }                                                                                                                     \
+  if (mlir::utils::file::PrintToString<mlir::ModuleOp>(mod1, m1).failed()) {                                            \
+    throw std::runtime_error(ASSERT_MSG(std::string("PrintToString ") + #mod1 + " failed while assert same module: ")); \
+  }                                                                                                                     \
+  if (m0 != m1) {                                                                                                       \
+    throw std::runtime_error(ASSERT_MSG(std::string(#mod0) + " and " + #mod1 + " are not same at : "));                 \
+  }                                                                                                                     \
 }
 
 #include "mlir/Pass/PassManager.h"
