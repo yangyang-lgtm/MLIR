@@ -1,11 +1,10 @@
 //
 // Created by ubuntu on 2025/8/28.
 //
+#include <sys/wait.h>
 
 #include <vector>
 #include <string>
-#include <cstdlib>
-#include <sys/wait.h>
 
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Transforms/Passes.h"
@@ -18,6 +17,7 @@
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Dialect/Bufferization/Transforms/Passes.h"
 
+#include "mlir/Dialect/SCF/Transforms/Passes.h"
 #include "mlir/Dialect/SCF/Transforms/BufferizableOpInterfaceImpl.h"
 #include "mlir/Dialect/Bufferization/Transforms/FuncBufferizableOpInterfaceImpl.h"
 #include "mlir/Dialect/Tensor/Transforms/BufferizableOpInterfaceImpl.h"
@@ -29,37 +29,61 @@
 #include "triton-shared/Dialect/TritonStructured/IR/TritonStructuredDialect.h"
 #include "triton-shared/Dialect/TritonTilingExt/IR/TritonTilingExtDialect.h"
 #include "triton-shared/Conversion/TritonToLinalgExperimental/Passes.h"
+#include "bufferization/Passes.h"
 
 #include "FileUtils.h"
 #include "config.h"
 
-static void run_mlir(const std::string& input, const std::string& out, const std::vector<std::string>& options) {
-  auto mlir_opt_path = std::string(MLIR_BIN) + "/mlir-opt";
-
-  std::vector<std::string> args{ mlir_opt_path, input };
+static void run_command(const std::string& cmd, const std::string& input,
+    const std::string& out, const std::vector<std::string>& options) {
+  std::vector<std::string> args{ cmd, input };
   for (const auto& opt : options) {
     args.push_back(opt);
   }
-  args.push_back("-o");
+  args.emplace_back("-o");
   args.push_back(out);
 
-  std::string cmd;
+  std::string command;
   for (const auto& arg : args) {
     if (arg.find(' ') != std::string::npos) {
-      cmd += "\"" + arg + "\" ";
+      command += "\"" + arg + "\" ";
       continue;
     }
-    cmd += arg + " ";
+    command += arg + " ";
   }
-
-  int exit_status = std::system(cmd.c_str());
+  llvm::outs() << "run command : " << command << "\n";
+  int exit_status = std::system(command.c_str());
   if (exit_status == -1) {
-    throw std::runtime_error("failed to execute command: " + cmd);
+    throw std::runtime_error("failed to execute command: " + command);
   }
   if (WEXITSTATUS(exit_status) != 0) {
     throw std::runtime_error("command failed with exit code: " + std::to_string(WEXITSTATUS(exit_status)));
   }
-  llvm::outs() << "print llvm.module to " << out << "\n";
+}
+
+static void run_decompiler(const std::string& input, const std::string& out, const std::vector<std::string>& options) {
+  run_command(std::string(RETDEC_PATH) + "/retdec-decompiler", input, out, options);
+  llvm::outs() << "decompiler llvm.o to " << out << "\n";
+}
+
+static void run_as(const std::string& input, const std::string& out, const std::vector<std::string>& options) {
+  run_command(/*/usr/bin/*/"as", input, out, options);
+  llvm::outs() << "print llvm.s to " << out << "\n";
+}
+
+static void run_llc(const std::string& input, const std::string& out, const std::vector<std::string>& options) {
+  run_command(std::string(MLIR_BIN) + "/llc", input, out, options);
+  llvm::outs() << "print llvm.ll to " << out << "\n";
+}
+
+static void run_translate(const std::string& input, const std::string& out, const std::vector<std::string>& options) {
+  run_command(std::string(MLIR_BIN) + "/mlir-translate", input, out, options);
+  llvm::outs() << "print llvm.ir to " << out << "\n";
+}
+
+static void run_mlir(const std::string& input, const std::string& out, const std::vector<std::string>& options) {
+  run_command(std::string(MLIR_BIN) + "/mlir-opt", input, out, options);
+  llvm::outs() << "print mlir.llvm.module to " << out << "\n";
 }
 
 template<typename... Ts>
@@ -112,6 +136,7 @@ int main (int argc, char** argv) {
   mlir::PassManager manager(&context);
   manager.addPass(mlir::triton::createTritonToLinalgExperimentalPass());
   manager.addPass(mlir::bufferization::createOneShotBufferizePass());
+  manager.addPass(mlir::bufferization::createSCFBufferizationPass());
   manager.addPass(mlir::createCanonicalizerPass());
 
   if (manager.run(*module).failed()){
@@ -124,7 +149,7 @@ int main (int argc, char** argv) {
     llvm::outs() << "print module error!\n";
   }
 
-  // convert mlir to llvm
+  // convert mlir to mlir.llvm
   std::vector<std::string> options{
     "--convert-linalg-to-affine-loops",
     // "--eliminate-empty-tensors",
@@ -150,5 +175,26 @@ int main (int argc, char** argv) {
   };
   auto llvm_out_file = std::filesystem::current_path() / "llvm_out.mlir";
   run_mlir(mlir_out_file.string(), llvm_out_file.string(), options);
+
+  // convert mlir.llvm to llvm.ll
+  std::vector<std::string> llvm_options{"--mlir-to-llvmir"};
+  auto llvm_out_ll = std::filesystem::current_path() / "llvm_out.ll";
+  run_translate(llvm_out_file.string(), llvm_out_ll.string(), llvm_options);
+
+  // convert llvm.ll to asm
+  auto llvm_out_llc = std::filesystem::current_path() / "llvm_out.s";
+  run_llc(llvm_out_ll.string(), llvm_out_llc.string(), {});
+
+  // build llvm.s to object.o
+  auto llvm_out_object = std::filesystem::current_path() / "llvm_out.o";
+  run_as(llvm_out_llc.string(), llvm_out_object.string(), {});
+
+  // decompiler
+  auto llvm_out_c = std::filesystem::current_path() / "target.c";
+  std::vector<std::string> decompiler_options{
+    "--cleanup",
+    "--backend-var-renamer readable"
+  };
+  run_decompiler(llvm_out_object.string(), llvm_out_c.string(), {});
   return 0;
 }

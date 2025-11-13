@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 project(triton-to-custom CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -9,6 +9,18 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/shared)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/shared)
 
 string(APPEND CMAKE_CXX_FLAGS " -fPIC")
+
+function(run_command)
+	set(CMD_LIST ${ARGV})
+	execute_process(
+		COMMAND ${CMD_LIST}
+		RESULT_VARIABLE EXTRACT_RESULT
+		ERROR_VARIABLE EXTRACT_ERROR
+	)
+	if(NOT ${EXTRACT_RESULT} EQUAL 0)
+		message(FATAL_ERROR "${EXTRACT_ERROR}")
+	endif()
+endfunction()
 
 if(NOT DEFINED LLVM_CMAKE_DIR)
   set(LLVM_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/lib/cmake/llvm")
@@ -26,6 +38,7 @@ endif ()
 set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resources")
 set(CASES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/cases")
 set(MLIR_BIN "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/bin")
+set(RETDEC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party/RetDec/bin")
 
 message(STATUS "LLVM_CMAKE_DIR: ${LLVM_CMAKE_DIR}")
 message(STATUS "MLIR_CMAKE_DIR: ${MLIR_CMAKE_DIR}")

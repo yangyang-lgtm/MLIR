@@ -7,5 +7,5 @@
 #include <iostream>
 
 TEST(Example) {
-  std::cout << "this is a example" << std::endl;
+  std::cout << "this is an example" << std::endl;
 }

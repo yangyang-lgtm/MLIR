@@ -7,10 +7,14 @@
 
 
 static mlir::Type convertType(mlir::Type type) {
-  if (auto floatTy = llvm::dyn_cast<mlir::FloatType>(type)) {
-    return mlir::Float64Type::get(floatTy.getContext());
-  }
-  return type;
+  return llvm::TypeSwitch<mlir::Type, mlir::Type>(type)
+      .Case<mlir::IntegerType>([](mlir::IntegerType iType) {
+        return mlir::IntegerType::get(iType.getContext(), 64);
+      })
+      .Case<mlir::FloatType>([](mlir::FloatType fType) {
+        return mlir::Float64Type::get(fType.getContext());
+      })
+      .Default([&](auto) { return type; });
 }
 
 static void reduceTest(mlir::triton::ReduceOp op) {
@@ -42,7 +46,7 @@ static void reduceTest(mlir::triton::ReduceOp op) {
     mlir::SmallVector<mlir::NamedAttribute> attrs;
     for (auto &attr : origOp.getAttrs()) {
       auto val = attr.getValue();
-      if (auto ta = llvm::dyn_cast<mlir::TypeAttr>(val)) {
+      if (auto ta = mlir::dyn_cast<mlir::TypeAttr>(val)) {
         val = mlir::TypeAttr::get(convertType(ta.getValue()));
       }
       attrs.emplace_back(attr.getName(), val);
@@ -68,6 +72,8 @@ static void reduceTest(mlir::triton::ReduceOp op) {
     returnVals.push_back(valueMap.lookup_or(val, val));
   }
   builder.create<mlir::triton::ReduceReturnOp>(origReturn.getLoc(), returnVals);
+
+  combineRegion.getBlocks().erase(combineRegion.getBlocks().back());
   op.dump();
 }
 
