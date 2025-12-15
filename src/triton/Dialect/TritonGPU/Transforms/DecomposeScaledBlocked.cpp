@@ -30,10 +30,6 @@ public:
 
   LogicalResult matchAndRewrite(DotScaledOp scaledDotOp,
                                 PatternRewriter &rewriter) const override {
-    if (isa_and_nonnull<MmaEncodingTrait>(
-            scaledDotOp.getResult().getType().getEncoding()))
-      return failure();
-
     // TODO: add support for m/n packed formats.
     if (!scaledDotOp.getLhsKPack() || !scaledDotOp.getRhsKPack())
       return failure();
@@ -49,7 +45,8 @@ public:
       auto vType = v.getType();
       auto encoding = DotOperandEncodingAttr::get(ctx, opIdx, retEnc,
                                                   vType.getElementType());
-      auto retTy = vType.cloneWithEncoding(encoding);
+      auto retTy = RankedTensorType::get(vType.getShape(),
+                                         vType.getElementType(), encoding);
       return rewriter.create<ConvertLayoutOp>(loc, retTy, v);
     };
 
@@ -127,7 +124,8 @@ private:
                                                   threadsPerWarp, numCTAs);
       // 2.1.2) Cast scale16 to SliceEncoding
       auto sliceEnc = SliceEncodingAttr::get(ctx, rank, blockedEnc);
-      auto sliceType = scaleTy.cloneWithEncoding(sliceEnc);
+      auto sliceType = RankedTensorType::get(
+          scaleTy.getShape(), scaleTy.getElementType(), sliceEnc);
       scale = rewriter.create<ConvertLayoutOp>(loc, sliceType, scale);
     }
     auto expandScale = rewriter.create<ExpandDimsOp>(loc, scale, rank);
@@ -171,7 +169,8 @@ private:
     auto cond = broadcastScale(rewriter, scaledDotOp, mod, scaleIsNan, dim);
     // Make scale is NaN compatible with mxfp
     auto condTy = cond.getType();
-    condTy = condTy.cloneWithEncoding(mxfp.getType().getEncoding());
+    condTy = RankedTensorType::get(condTy.getShape(), condTy.getElementType(),
+                                   mxfp.getType().getEncoding());
     cond = rewriter.create<ConvertLayoutOp>(loc, condTy, cond);
 
     // Create NaN

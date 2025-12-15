@@ -127,10 +127,7 @@ SmallVector<int64_t> getTMABlockShape(ArrayRef<int64_t> shapePerCTA,
   // Last dim must equal the swizzle byte size
   if (swizzleBytes != 0) {
     auto contigDimSize = (8 * swizzleBytes) / elementBitWidth;
-    if (blockShape[contigDim] < contigDimSize) {
-      llvm::report_fatal_error("Block shape is too small for the swizzle byte "
-                               "size in NVMMA Shared Layout.");
-    }
+    assert(blockShape[contigDim] >= contigDimSize);
     blockShape[contigDim] = contigDimSize;
   }
   if (fp4Padded && packedSize) {

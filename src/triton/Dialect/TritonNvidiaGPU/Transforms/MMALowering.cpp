@@ -24,7 +24,7 @@ public:
   LogicalResult matchAndRewrite(TCGen5MMAOpTy op,
                                 PatternRewriter &rewriter) const override {
     // If the op doesn't have synchronous semantic skip the pattern.
-    if (op.getIsAsync())
+    if (!op.getBarriers().empty())
       return failure();
     MLIRContext *ctx = op.getContext();
     Location loc = op.getLoc();
@@ -42,7 +42,6 @@ public:
     rewriter.create<InitBarrierOp>(loc, barrierAlloc, 1);
     op.addCompletionBarrier(barrierAlloc,
                             rewriter.create<arith::ConstantIntOp>(loc, 1, 1));
-    op.setIsAsync(true);
 
     rewriter.setInsertionPointAfter(op);
     Value phase = rewriter.create<arith::ConstantIntOp>(loc, 0, 32);

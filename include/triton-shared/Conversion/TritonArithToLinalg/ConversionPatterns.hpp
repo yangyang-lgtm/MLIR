@@ -649,27 +649,27 @@ struct SplatConverter : public OpConversionPattern<triton::SplatOp> {
   }
 };
 
-struct UnsplatConverter : public OpConversionPattern<triton::UnsplatOp> {
-  using OpConversionPattern::OpConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(triton::UnsplatOp op, OpAdaptor adaptor,
-                  ConversionPatternRewriter &rewriter) const override {
-    auto tensorType = op.getSrc().getType();
-
-    // Only generate indices for non-zero rank tensors.
-    SmallVector<Value, 1> indices(tensorType.getRank());
-    if (indices.size() > 0) {
-      auto zeroIdx =
-          rewriter.createOrFold<arith::ConstantIndexOp>(op.getLoc(), 0);
-      llvm::fill(indices, zeroIdx);
-    }
-
-    rewriter.replaceOpWithNewOp<tensor::ExtractOp>(op, adaptor.getSrc(),
-                                                   indices);
-    return success();
-  }
-};
+// struct UnsplatConverter : public OpConversionPattern<triton::UnsplatOp> {
+//   using OpConversionPattern::OpConversionPattern;
+//
+//   LogicalResult
+//   matchAndRewrite(triton::UnsplatOp op, OpAdaptor adaptor,
+//                   ConversionPatternRewriter &rewriter) const override {
+//     auto tensorType = op.getSrc().getType();
+//
+//     // Only generate indices for non-zero rank tensors.
+//     SmallVector<Value, 1> indices(tensorType.getRank());
+//     if (indices.size() > 0) {
+//       auto zeroIdx =
+//           rewriter.createOrFold<arith::ConstantIndexOp>(op.getLoc(), 0);
+//       llvm::fill(indices, zeroIdx);
+//     }
+//
+//     rewriter.replaceOpWithNewOp<tensor::ExtractOp>(op, adaptor.getSrc(),
+//                                                    indices);
+//     return success();
+//   }
+// };
 
 struct BroadcastConverter : public OpConversionPattern<triton::BroadcastOp> {
 private:

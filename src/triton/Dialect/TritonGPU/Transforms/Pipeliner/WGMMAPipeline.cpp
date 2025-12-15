@@ -281,7 +281,7 @@ SmallVector<Value> splitLhs(OpBuilder &builder,
 }
 
 // Split the RHS of a RSWGMMADot operation into multiple multiple
-// tensors of size newKxN via MemDescSubslice
+// tensors of size newKxN via MemDescSubview
 SmallVector<Value> splitRhs(OpBuilder &builder,
                             TypedValue<ttg::MemDescType> rhs, int64_t newK) {
   auto loc = rhs.getLoc();
@@ -291,15 +291,18 @@ SmallVector<Value> splitRhs(OpBuilder &builder,
   auto nSplits = type.getShape()[kDim] / newK;
   auto shape = llvm::to_vector(type.getShape());
   shape[kDim] = newK;
-  SmallVector<int32_t> offsets(rank, 0);
+  SmallVector<Value> offsetsVal;
+  for (int i = 0; i < rank; i++) {
+    offsetsVal.push_back(builder.create<arith::ConstantIntOp>(loc, 0, 32));
+  }
   auto newType = ttg::MemDescType::get(
       shape, type.getElementType(), type.getEncoding(), type.getMemorySpace(),
       /*isMutable=*/false, type.getAllocShape());
   SmallVector<Value> ret;
   for (int i = 0; i < nSplits; i++) {
-    offsets[kDim] = i * newK;
-    Value newSmem =
-        builder.create<ttg::MemDescSubsliceOp>(loc, newType, rhs, offsets);
+    offsetsVal[kDim] = builder.create<arith::ConstantIntOp>(loc, i * newK, 32);
+    Value newSmem = builder.create<triton::gpu::MemDescSubviewOp>(
+        loc, newType, rhs, offsetsVal);
     ret.push_back(newSmem);
   }
   return ret;
@@ -428,11 +431,11 @@ static std::optional<int> dotCanBeProperlyAsync(ttng::WarpGroupDotOp dotOp,
       return true;
     }
     // If it's a shmem operand, it must either be defined outside the loop, or
-    // come from an MemDescIndex op.  Only ConvertLayout and view ops are
+    // come from an MemDescSubview op.  Only ConvertLayout and view ops are
     // allowed in between.
     Value transitiveOperand = operand;
     while (isa_and_nonnull<ttg::ConvertLayoutOp, ttg::MemDescTransOp,
-                           ttg::MemDescReshapeOp, ttg::MemDescSubsliceOp>(
+                           ttg::MemDescReshapeOp>(
                transitiveOperand.getDefiningOp()) ||
            isa<BlockArgument>(transitiveOperand)) {
       auto blockArg = dyn_cast<BlockArgument>(transitiveOperand);
@@ -445,7 +448,7 @@ static std::optional<int> dotCanBeProperlyAsync(ttng::WarpGroupDotOp dotOp,
       }
     }
     return forOp.isDefinedOutsideOfLoop(transitiveOperand) ||
-           transitiveOperand.getDefiningOp<ttg::MemDescIndexOp>();
+           transitiveOperand.getDefiningOp<ttg::MemDescSubviewOp>();
   };
 
   // Rule 1: All shmem operands are multi-buffered.

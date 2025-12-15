@@ -67,6 +67,17 @@ void Case##name::run_test(int argc, char **argv)
   }                                                                                                        \
 }
 
+inline bool is_same_module(mlir::ModuleOp mod0, mlir::ModuleOp mod1) {
+  std::string m0, m1;
+  if (mlir::utils::file::PrintToString<mlir::ModuleOp>(mod0, m0).failed()) {
+    throw std::runtime_error(ASSERT_MSG("PrintToString"));
+  }
+  if (mlir::utils::file::PrintToString<mlir::ModuleOp>(mod1, m1).failed()) {
+    throw std::runtime_error(ASSERT_MSG("PrintToString"));
+  }
+  return m0 == m1;
+}
+
 #define ASSERT_SAME_MODULE(mod0, mod1)                                                                                  \
 {                                                                                                                       \
   std::string m0, m1;                                                                                                   \
@@ -93,9 +104,13 @@ void Case##name::run_test(int argc, char **argv)
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 
 #include "triton/Dialect/Triton/IR/Dialect.h"
+#include "triton/Dialect/TritonGPU/IR/Dialect.h"
+
 #include "triton-shared/Dialect/TPtr/IR/TPtrDialect.h"
 #include "triton-shared/Dialect/TritonStructured/IR/TritonStructuredDialect.h"
 #include "triton-shared/Dialect/TritonTilingExt/IR/TritonTilingExtDialect.h"
+
+#include "custom/include/Custom/IR/CustomDialect.h"
 
 void init_dialects(mlir::MLIRContext& context);
 #endif //TRITON_TO_CUSTOM_TEST_UTILS_H

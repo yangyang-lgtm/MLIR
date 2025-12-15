@@ -123,11 +123,11 @@ tt::CoarseSchedule::splitClusterBefore(Operation *op, scf::ForOp forOp) {
 }
 
 // Check if op a will show up before op b in the final unrolled code.
-bool tt::CoarseSchedule::isOpBefore(Operation *a, Operation *b) const {
+bool tt::CoarseSchedule::isOpBefore(Operation *a, Operation *b) {
   assert(opToStageAndCluster.count(a) && opToStageAndCluster.count(b) &&
          "Operations must be in the schedule");
-  auto [aStage, aCluster] = opToStageAndCluster.lookup(a);
-  auto [bStage, bCluster] = opToStageAndCluster.lookup(b);
+  auto [aStage, aCluster] = opToStageAndCluster[a];
+  auto [bStage, bCluster] = opToStageAndCluster[b];
   if (aStage != bStage) {
     return aStage < bStage;
   }
@@ -137,23 +137,21 @@ bool tt::CoarseSchedule::isOpBefore(Operation *a, Operation *b) const {
   return a->isBeforeInBlock(b);
 }
 
-bool tt::CoarseSchedule::isOpInEarlierCluster(Operation *a,
-                                              Operation *b) const {
+bool tt::CoarseSchedule::isOpInEarlierCluster(Operation *a, Operation *b) {
   assert(opToStageAndCluster.count(a) && opToStageAndCluster.count(b) &&
          "Operations must be in the schedule");
-  return clusters.isBefore(opToStageAndCluster.lookup(a).second,
-                           opToStageAndCluster.lookup(b).second);
+  return clusters.isBefore(opToStageAndCluster[a].second,
+                           opToStageAndCluster[b].second);
 }
 
-bool tt::CoarseSchedule::isOpInSameCluster(Operation *a, Operation *b) const {
+bool tt::CoarseSchedule::isOpInSameCluster(Operation *a, Operation *b) {
   assert(opToStageAndCluster.count(a) && opToStageAndCluster.count(b) &&
          "Operations must be in the schedule");
-  return opToStageAndCluster.lookup(a).second ==
-         opToStageAndCluster.lookup(b).second;
+  return opToStageAndCluster[a].second == opToStageAndCluster[b].second;
 }
 
 SmallVector<std::tuple<Operation *, int, tt::CoarseSchedule::Cluster>>
-tt::CoarseSchedule::getOpsInOrder(scf::ForOp forOp) const {
+tt::CoarseSchedule::getOpsInOrder(scf::ForOp forOp) {
   SmallVector<SmallVector<std::tuple<Operation *, int, Cluster>>, 8>
       orderClusters(clusters.size());
   for (auto &op : forOp.getBody()->without_terminator()) {
@@ -162,11 +160,12 @@ tt::CoarseSchedule::getOpsInOrder(scf::ForOp forOp) const {
       continue;
     }
     auto [stage, cluster] = it->second;
-    assert(cluster != Cluster{} && "Op with invalid cluster!");
+    if (cluster == Cluster{}) {
+      continue;
+    }
     assert(stage < numStages && "Op with invalid stage!");
     int clusterId = *cluster;
-    assert(clusterId == std::distance(clusters.begin(),
-                                      ClusterList::const_iterator(cluster)) &&
+    assert(clusterId == std::distance(clusters.begin(), cluster) &&
            "Cluster ID mismatch!");
     orderClusters[clusterId].push_back(make_tuple(&op, stage, cluster));
   }
@@ -181,7 +180,7 @@ tt::CoarseSchedule::getOpsInOrder(scf::ForOp forOp) const {
 }
 
 std::vector<std::pair<Operation *, unsigned>>
-tt::CoarseSchedule::createFinalSchedule(scf::ForOp forOp) const {
+tt::CoarseSchedule::createFinalSchedule(scf::ForOp forOp) {
   SmallVector<std::tuple<Operation *, int, tt::CoarseSchedule::Cluster>>
       opsInOrder = getOpsInOrder(forOp);
   std::vector<std::pair<Operation *, unsigned>> schedule;
@@ -249,7 +248,7 @@ static std::optional<int> tryGetMaxStage(scf::ForOp &forOp) {
 }
 
 // Set <stage, cluster> based on CoarseSchedule.
-void tt::CoarseSchedule::serialize(scf::ForOp &forOp) const {
+void tt::CoarseSchedule::serialize(scf::ForOp &forOp) {
   for (auto [op, stage, cluster] : getOpsInOrder(forOp)) {
     setStageCluster(op, stage, *cluster);
   }

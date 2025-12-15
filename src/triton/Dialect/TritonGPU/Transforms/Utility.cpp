@@ -92,11 +92,9 @@ bool isLoadFromTensorPtr(triton::LoadOp op) {
   return mlir::triton::isTensorPointerType(op.getPtr().getType());
 }
 
-SmallVector<unsigned, 4>
-getOrderFromContiguity(const SmallVector<int64_t> &arr) {
+SmallVector<unsigned, 4> argSort(const SmallVector<int64_t> &arr) {
   SmallVector<unsigned, 4> ret(arr.size());
   std::iota(ret.begin(), ret.end(), 0);
-  std::reverse(ret.begin(), ret.end());
   std::stable_sort(ret.begin(), ret.end(),
                    [&](unsigned x, unsigned y) { return arr[x] > arr[y]; });
   return ret;
@@ -636,7 +634,8 @@ bool canFoldIntoConversion(Operation *op, Attribute targetEncoding) {
   if (auto reshape = dyn_cast<triton::ReshapeOp>(op)) {
     auto reshapeDstType = reshape.getType();
     RankedTensorType newDstType =
-        reshapeDstType.cloneWithEncoding(targetEncoding);
+        RankedTensorType::get(reshapeDstType.getShape(),
+                              reshapeDstType.getElementType(), targetEncoding);
     return reshape.getAllowReorder() && !reshape.getEfficientLayout() &&
            !triton::gpu::isExpensiveView(reshape.getSrc().getType(),
                                          newDstType);
@@ -823,7 +822,8 @@ Operation *cloneWithInferType(mlir::OpBuilder &rewriter, Operation *op,
   auto argType = dyn_cast<RankedTensorType>(newOp->getOperand(0).getType());
   if (!origType || !argType)
     return newOp;
-  auto newType = origType.cloneWithEncoding(argType.getEncoding());
+  auto newType = RankedTensorType::get(
+      origType.getShape(), origType.getElementType(), argType.getEncoding());
   newOp->getResult(0).setType(newType);
   auto typeInfer = dyn_cast<InferTypeOpInterface>(newOp);
   if (typeInfer) {
@@ -1053,19 +1053,14 @@ int getNVIDIAComputeCapability(Operation *module) {
   return computeCapability;
 }
 
-std::optional<StringRef> getAMDArch(Operation *module) {
+StringRef getAMDArch(Operation *module) {
   StringAttr targetAttr =
       module->getAttrOfType<StringAttr>(triton::gpu::AttrTargetName);
-  if (!targetAttr) {
-    LDBG("Expected a target attribute on the module operation");
-    return {};
-  }
+  assert(targetAttr && "Expected a target attribute on the module operation");
 
   StringRef ref = targetAttr.strref();
-  if (!ref.starts_with("hip:")) {
-    LDBG("expected target attribute to be prefixed with \"hip:\"");
-    return {};
-  }
+  assert(ref.starts_with("hip:") &&
+         "expected target attribute to be prefixed with \"hip:\"");
 
   return ref.drop_front(4); // drop the "hip:"
 }
@@ -1307,11 +1302,11 @@ void populateForOpDeadArgumentElimination(RewritePatternSet &patterns) {
 
 ttg::LocalAllocOp findShmemAlloc(Value operand) {
   // If it's a shmem operand, it must either be defined outside the loop, or
-  // come from an MemDescIndex op. Only ConvertLayout and MemdescView ops are
+  // come from an MemDescSubview op. Only ConvertLayout and Trans ops are
   // allowed in between.
   Value transitiveOperand = operand;
   while (isa_and_nonnull<ttg::ConvertLayoutOp, tt::TransOp, ttg::MemDescTransOp,
-                         ttg::MemDescReshapeOp, ttg::MemDescSubsliceOp>(
+                         ttg::MemDescReshapeOp>(
              transitiveOperand.getDefiningOp()) ||
          isa<BlockArgument>(transitiveOperand)) {
     if (auto blockArg = dyn_cast<BlockArgument>(transitiveOperand)) {
@@ -1324,7 +1319,7 @@ ttg::LocalAllocOp findShmemAlloc(Value operand) {
       transitiveOperand = transitiveOperand.getDefiningOp()->getOperand(0);
     }
   }
-  if (auto subView = dyn_cast_or_null<ttg::MemDescIndexOp>(
+  if (auto subView = dyn_cast_or_null<ttg::MemDescSubviewOp>(
           transitiveOperand.getDefiningOp())) {
     // Multi-buffered operand
     return dyn_cast_or_null<ttg::LocalAllocOp>(
@@ -1463,11 +1458,8 @@ void eraseLoopCarriedValues(scf::ForOp &loop, llvm::BitVector indices) {
 } // namespace mlir
 
 namespace mlir::triton {
-
-void replaceUsesAndPropagateType(
-    OpBuilder &builder, Operation *oldUse, Value val,
-    std::function<void(Operation *, Operation *)> callback) {
-  OpBuilder::InsertionGuard guard(builder);
+void replaceUsesAndPropagateType(OpBuilder &builder, Operation *oldUse,
+                                 Value val) {
   SmallVector<Operation *> opsToDelete;
   SmallVector<OpOperand *> operandsToReplace;
 
@@ -1488,39 +1480,28 @@ void replaceUsesAndPropagateType(
 
     Operation *user = use.getOwner();
     // `subview(old_op)` is replaced by a new `subview(val)`.
+    OpBuilder::InsertionGuard g(builder);
     builder.setInsertionPoint(user);
     Value newVal;
-    if (auto subview = dyn_cast<ttg::MemDescIndexOp>(user)) {
+    if (auto subview = dyn_cast<ttg::MemDescSubviewOp>(user)) {
       ttg::MemDescType oldType = subview.getType();
       bool isMutable = cast<ttg::MemDescType>(val.getType()).getMutableMemory();
       Type newDstType = ttg::MemDescType::get(
           oldType.getShape(), oldType.getElementType(), oldType.getEncoding(),
-          oldType.getMemorySpace(), isMutable, oldType.getAllocShape());
-      newVal = builder.create<ttg::MemDescIndexOp>(subview.getLoc(), newDstType,
-                                                   val, subview.getIndex());
-    } else if (auto subslice = dyn_cast<ttg::MemDescSubsliceOp>(user)) {
-      ttg::MemDescType oldType = subslice.getType();
-      bool isMutable = cast<ttg::MemDescType>(val.getType()).getMutableMemory();
-      Type newDstType = ttg::MemDescType::get(
-          oldType.getShape(), oldType.getElementType(), oldType.getEncoding(),
-          oldType.getMemorySpace(), isMutable, oldType.getAllocShape());
-      newVal = builder.create<ttg::MemDescSubsliceOp>(
-          subslice.getLoc(), newDstType, val, subslice.getOffsets());
+          oldType.getMemorySpace(), isMutable);
+      newVal = builder.create<ttg::MemDescSubviewOp>(
+          subview.getLoc(), newDstType, val, subview.getOffsets());
     } else if (auto trans = dyn_cast<ttg::MemDescTransOp>(user)) {
       newVal = builder.create<ttg::MemDescTransOp>(trans.getLoc(), val,
                                                    trans.getOrder());
     } else if (auto reshape = dyn_cast<ttg::MemDescReshapeOp>(user)) {
-      auto shape = reshape.getType().getShape();
-      newVal =
-          builder.create<ttg::MemDescReshapeOp>(reshape.getLoc(), val, shape);
+      newVal = builder.create<ttg::MemDescReshapeOp>(reshape.getLoc(),
+                                                     reshape.getType(), val);
     }
     assert(newVal && "unhandled memdesc view");
     newVal.getDefiningOp()->setAttrs(user->getAttrs());
     replaceUsesAndPropagateType(builder, user, newVal);
-    opsToDelete.push_back(user);
-    if (callback) {
-      callback(user, newVal.getDefiningOp());
-    }
+    opsToDelete.push_back(use.getOwner());
   }
 
   // Perform late replacement.
@@ -1535,6 +1516,7 @@ void replaceUsesAndPropagateType(
       wait.replaceAllUsesWith(newWait.getResults());
       wait.erase();
     } else {
+      Operation *op = operand->getOwner();
       operand->set(val);
     }
   }
@@ -1544,10 +1526,9 @@ void replaceUsesAndPropagateType(
     op->erase();
 }
 
-ttg::LocalLoadOp
-replaceUsesWithLocalLoad(OpBuilder &builder, OpResult old,
-                         TypedValue<ttg::MemDescType> alloc,
-                         TypedValue<ttg::AsyncTokenType> token) {
+void replaceUsesWithLocalLoad(OpBuilder &builder, OpResult old,
+                              TypedValue<ttg::MemDescType> alloc,
+                              TypedValue<ttg::AsyncTokenType> token) {
   //  Remove redundant local_load -> local_alloc
   auto allocTy = alloc.getType();
   SmallVector<ttg::LocalAllocOp> allocsToErase;
@@ -1562,18 +1543,16 @@ replaceUsesWithLocalLoad(OpBuilder &builder, OpResult old,
 
   // If there are some uses that were not local_allocs, we need to create a
   // local_load for them.
-  ttg::LocalLoadOp maybeLocalLoad;
   if (std::distance(old.getUsers().begin(), old.getUsers().end()) >
       allocsToErase.size()) {
     auto loc = old.getOwner()->getLoc();
-    maybeLocalLoad = builder.template create<ttg::LocalLoadOp>(
+    auto sharedLoad = builder.template create<ttg::LocalLoadOp>(
         loc, old.getType(), alloc, token);
-    old.replaceAllUsesWith(maybeLocalLoad);
+    old.replaceAllUsesWith(sharedLoad.getResult());
   }
   for (auto alloc : allocsToErase) {
     alloc.erase();
   }
-  return maybeLocalLoad;
 }
 
 bool comesFromLoadOrBlockArg(Value v) {
@@ -1602,38 +1581,6 @@ bool comesFromLoadOrBlockArg(Value v) {
   return isa<BlockArgument>(v) ||
          (v.getDefiningOp() &&
           isa<LoadOp, DescriptorLoadOp, DescriptorGatherOp>(v.getDefiningOp()));
-}
-
-SmallVector<Value> getTiedArgs(Operation *op, int resultIdx) {
-  if (auto forOp = dyn_cast<scf::ForOp>(op)) {
-    auto iterArg = forOp.getRegionIterArg(resultIdx);
-    auto result = forOp.getResult(resultIdx);
-    auto yieldVal = forOp.getBody()->getTerminator()->getOperand(resultIdx);
-    auto initVal = forOp.getInitArgs()[resultIdx];
-    return {iterArg, result, yieldVal, initVal};
-  } else if (auto whileOp = dyn_cast<scf::WhileOp>(op)) {
-    auto iterArg = whileOp.getBeforeArguments()[resultIdx];
-    auto result = whileOp.getResults()[resultIdx];
-    auto yieldVal = whileOp.getConditionOp().getArgs()[resultIdx];
-    auto initVal = whileOp.getOperands()[resultIdx];
-    auto bodyArg = whileOp.getAfterArguments()[resultIdx];
-    return {iterArg, result, yieldVal, initVal, bodyArg};
-  } else if (auto ifOp = dyn_cast<scf::IfOp>(op)) {
-    SmallVector<Value> values;
-    for (auto &block : ifOp.getThenRegion().getBlocks()) {
-      auto terminator = block.getTerminator();
-      if (isa<scf::YieldOp>(terminator))
-        values.push_back(terminator->getOperands()[resultIdx]);
-    }
-    for (auto &block : ifOp.getElseRegion().getBlocks()) {
-      auto terminator = block.getTerminator();
-      if (isa<scf::YieldOp>(terminator))
-        values.push_back(terminator->getOperands()[resultIdx]);
-    }
-    values.push_back(ifOp->getResults()[resultIdx]);
-    return values;
-  }
-  return {};
 }
 
 } // namespace mlir::triton

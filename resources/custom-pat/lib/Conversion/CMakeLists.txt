@@ -1,0 +1,3 @@
+add_subdirectory(TritonToCustom)
+add_subdirectory(TritonToFunction)
+add_subdirectory(ArithToCustom)

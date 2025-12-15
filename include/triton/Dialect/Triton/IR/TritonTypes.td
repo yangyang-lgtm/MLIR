@@ -108,7 +108,7 @@ def TT_TensorDescType : TritonTypeDef<"TensorDesc", "tensordesc", []> {
       if (auto intTy = llvm::dyn_cast<IntegerType>(blockType.getElementType())) {
         auto sem = isSigned ? IntegerType::Signed : IntegerType::Unsigned;
         auto elemTy = IntegerType::get($_ctxt, intTy.getWidth(), sem);
-        blockType = blockType.clone(elemTy);
+        blockType = RankedTensorType::get(blockType.getShape(), elemTy);
       }
       return Base::get($_ctxt, blockType);
     }]>,
@@ -119,7 +119,7 @@ def TT_TensorDescType : TritonTypeDef<"TensorDesc", "tensordesc", []> {
       if (auto intTy = llvm::dyn_cast<IntegerType>(resTy.getElementType())) {
         auto width = resTy.getElementTypeBitWidth();
         auto signlessTy = IntegerType::get(getContext(), width);
-        resTy = resTy.clone(signlessTy);
+        resTy = RankedTensorType::get(resTy.getShape(), signlessTy);
       }
       return resTy;
     }

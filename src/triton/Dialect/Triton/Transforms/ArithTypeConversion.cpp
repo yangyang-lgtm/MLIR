@@ -13,7 +13,7 @@ struct RewriteArithSelectOp : mlir::OpConversionPattern<mlir::arith::SelectOp> {
 
   mlir::LogicalResult
   matchAndRewrite(mlir::arith::SelectOp op, OneToNOpAdaptor adaptor,
-                  mlir::ConversionPatternRewriter &rewriter) const override {
+                  mlir::ConversionPatternRewriter &rewriter) const {
     // Note we're replacing the select op with an if op because we are
     // converting one value into many values.
     auto newIf = rewriter.create<mlir::scf::IfOp>(

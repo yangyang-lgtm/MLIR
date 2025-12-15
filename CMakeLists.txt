@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 project(triton-to-custom CXX C)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
@@ -23,21 +23,21 @@ function(run_command)
 endfunction()
 
 if(NOT DEFINED LLVM_CMAKE_DIR)
-  set(LLVM_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/lib/cmake/llvm")
+  set(LLVM_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project-mlir/llvm/cmake-build-debug/lib/cmake/llvm")
 endif()
 
 if (NOT DEFINED MLIR_CMAKE_DIR)
-  set(MLIR_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/lib/cmake/mlir")
+  set(MLIR_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project-mlir/llvm/cmake-build-debug/lib/cmake/mlir")
 endif()
 
 if (NOT DEFINED CLANG_CMAKE_DIR)
-  set(CLANG_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/lib/cmake/clang")
-  set(CLANG_BIN "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/bin")
+  set(CLANG_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project-mlir/llvm/cmake-build-debug/lib/cmake/clang")
+  set(CLANG_BIN "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project-mlir/llvm/cmake-build-debug/bin")
 endif ()
 
 set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resources")
 set(CASES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/cases")
-set(MLIR_BIN "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project/build/bin")
+set(MLIR_BIN "${CMAKE_CURRENT_SOURCE_DIR}/../llvm-project-mlir/llvm/cmake-build-debug/bin")
 set(RETDEC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party/RetDec/bin")
 
 message(STATUS "LLVM_CMAKE_DIR: ${LLVM_CMAKE_DIR}")
@@ -88,6 +88,7 @@ include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})
 include_directories(${CLANG_INCLUDE_DIRS})
 
+
 message(STATUS "LLVM_ENABLE_RTTI: ${LLVM_ENABLE_RTTI}")
 if(LLVM_ENABLE_RTTI)
   string(APPEND CMAKE_CXX_FLAGS " -frtti")
@@ -98,6 +99,9 @@ endif()
 set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_BINARY_DIR}/third_party
     ${CMAKE_CURRENT_BINARY_DIR}/src)
 
 set(LINK_LIBRARIES_DIRS
@@ -107,6 +111,7 @@ include_directories(${INCLUDE_DIRS})
 link_directories(${LINK_LIBRARIES_DIRS})
 
 add_subdirectory(include)
+add_subdirectory(third_party)
 add_subdirectory(src)
 
 get_property(triton_libs GLOBAL PROPERTY TRITON_LIBS)

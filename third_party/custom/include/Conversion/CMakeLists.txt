@@ -1,0 +1,2 @@
+add_subdirectory(TritonToCustom)
+add_subdirectory(TritonSharedToCustom)

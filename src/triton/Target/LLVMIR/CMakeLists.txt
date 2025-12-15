@@ -13,14 +13,13 @@ add_triton_library(TritonLLVMIR
         MLIRIndexToLLVM
         MLIRIR
         MLIRLLVMDialect
-        MLIRNVVMToLLVM
         MLIRLLVMToLLVMIRTranslation
         MLIRNVVMToLLVMIRTranslation
         MLIRROCDLToLLVMIRTranslation
         MLIRSCFToControlFlow
         MLIRSupport
         MLIRTargetLLVMIRExport
-#        TritonGPUToLLVM
+        TritonGPUToLLVM
         )
 
 set_source_files_properties(

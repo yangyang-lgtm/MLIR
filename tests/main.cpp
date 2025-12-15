@@ -29,6 +29,8 @@ void init_dialects(mlir::MLIRContext& context){
     mlir::scf::SCFDialect,
     mlir::arith::ArithDialect,
     mlir::triton::TritonDialect,
+    mlir::triton::gpu::TritonGPUDialect,
+    mlir::custom::CustomDialect,
     mlir::tptr::TPtrDialect,
     mlir::ptr::PtrDialect,
     mlir::tts::TritonStructuredDialect,

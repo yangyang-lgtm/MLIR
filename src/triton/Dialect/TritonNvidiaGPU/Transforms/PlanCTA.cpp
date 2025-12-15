@@ -55,7 +55,8 @@ Type replaceLayout(const Type &type, const Attribute &newLayout) {
   if (ptrTy)
     curType = ptrTy.getPointeeType();
   if (auto tensorTy = dyn_cast<RankedTensorType>(curType))
-    curType = tensorTy.cloneWithEncoding(newLayout);
+    curType = RankedTensorType::get(tensorTy.getShape(),
+                                    tensorTy.getElementType(), newLayout);
   if (ptrTy)
     curType = triton::PointerType::get(curType, ptrTy.getAddressSpace());
   return curType;
@@ -724,7 +725,8 @@ bool CTAPlanner::processConstant(arith::ConstantOp constant, Attribute layout) {
   if (auto tensorTy = dyn_cast<RankedTensorType>(constant.getType())) {
     if (auto attr = dyn_cast<SplatElementsAttr>(constant.getValue())) {
 
-      auto newTensorTy = tensorTy.cloneWithEncoding(layout);
+      auto newTensorTy = RankedTensorType::get(
+          tensorTy.getShape(), tensorTy.getElementType(), layout);
       constant.setValueAttr(
           SplatElementsAttr::get(newTensorTy, attr.getSplatValue<Attribute>()));
     }

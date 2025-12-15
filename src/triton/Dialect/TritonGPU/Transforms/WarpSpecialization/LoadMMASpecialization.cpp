@@ -1,3 +1,4 @@
+#include "PartitionBuilder.h"
 #include "mlir/Dialect/UB/IR/UBOps.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Dominance.h"
@@ -8,7 +9,6 @@
 #include "triton/Dialect/TritonGPU/IR/Dialect.h"
 #include "triton/Dialect/TritonGPU/Transforms/MMAv5PipelineUtility.h"
 #include "triton/Dialect/TritonGPU/Transforms/Partition.h"
-#include "triton/Dialect/TritonGPU/Transforms/PartitionBuilder.h"
 #include "triton/Dialect/TritonGPU/Transforms/Passes.h"
 #include "triton/Dialect/TritonGPU/Transforms/PipeliningUtility.h"
 #include "triton/Dialect/TritonGPU/Transforms/Utility.h"
@@ -47,7 +47,7 @@ struct PipelinedLoad {
 
   SmallVector<Operation *, 1> allocOps;
   SmallVector<Operation *, 1> liveBeforeOps;
-  SmallVector<std::pair<Operation *, bool>, 0> liveUntilOps;
+  SmallVector<Operation *, 0> liveUntilOps;
   SmallVector<Operation *, 1> asyncUsers;
 };
 
@@ -84,6 +84,15 @@ getPartitionScheme(scf::ForOp loop, const WarpSchedule &schedule) {
 //===----------------------------------------------------------------------===//
 // Utilities
 //===----------------------------------------------------------------------===//
+
+static void replaceAllUsesDominatedBy(Operation *domOp, Value newValue,
+                                      Value oldValue, DominanceInfo &domInfo) {
+  if (newValue == oldValue)
+    return;
+  oldValue.replaceUsesWithIf(newValue, [&](OpOperand &use) {
+    return domInfo.properlyDominates(domOp, use.getOwner());
+  });
+}
 
 static std::pair<Value, Value> postIncrementModulo(ImplicitLocOpBuilder &b,
                                                    Value index, Value phase,
@@ -243,6 +252,8 @@ LogicalResult PipelinedLoad::determineLiveRange(Block &container,
     // memory must be live until after this operation.
     Operation *lastShmemSink =
         findNearestCommonPostDominator(shmemTerminals, postDomInfo);
+    if (lastShmemSink)
+      lastShmemSink = lastShmemSink->getNextNode();
 
     // The memory only needs to be live until before the first register user.
     Operation *liveUntilReg = findNearestCommonDominator(regSink, domInfo);
@@ -251,31 +262,19 @@ LogicalResult PipelinedLoad::determineLiveRange(Block &container,
 
     // The memory is live until before the first register user or after the last
     // shmem terminal, whichever is later.
-    std::pair<Operation *, bool> liveUntilOp{nullptr, false};
+    Operation *liveUntilOp;
     if (lastShmemSink && liveUntilReg) {
-      if (liveUntilReg->isBeforeInBlock(lastShmemSink))
-        liveUntilOp = {lastShmemSink, /*after=*/true};
-      else
-        liveUntilOp = {liveUntilReg, /*after=*/false};
+      liveUntilOp = liveUntilReg->isBeforeInBlock(lastShmemSink) ? lastShmemSink
+                                                                 : liveUntilReg;
     } else if (liveUntilReg) {
-      liveUntilOp = {liveUntilReg, /*after=*/false};
+      liveUntilOp = liveUntilReg;
     } else {
-      liveUntilOp = {lastShmemSink, /*after=*/true};
+      liveUntilOp = lastShmemSink;
     }
     liveUntilOps.push_back(liveUntilOp);
   }
 
   return success();
-}
-
-static void propagateMutability(Value value) {
-  for (Operation *user : value.getUsers()) {
-    if (user->hasTrait<OpTrait::MemDescViewTrait>()) {
-      user->getResult(0).setType(
-          getAsMutable(cast<MemDescType>(user->getResult(0).getType())));
-      propagateMutability(user->getResult(0));
-    }
-  }
 }
 
 namespace {
@@ -317,7 +316,7 @@ void PipelinedLoadGroup::allocateAref(scf::ForOp &loop, int numStages) {
   for (PipelinedLoad &load : loads) {
     distinctAsyncUsers.insert(load.asyncUsers.begin(), load.asyncUsers.end());
     int numLiveUntil =
-        llvm::count_if(load.liveUntilOps, [](auto p) { return !!p.first; });
+        llvm::count_if(load.liveUntilOps, [](Operation *op) { return !!op; });
     maxLiveUntil = std::max(maxLiveUntil, numLiveUntil);
   }
   int arriveCount = distinctAsyncUsers.size() + maxLiveUntil;
@@ -391,11 +390,8 @@ LogicalResult PipelinedLoadGroup::lowerLoads(WarpSchedule &schedule,
 
     SmallVector<Operation *> liveUntilOps;
     for (PipelinedLoad &load : loads) {
-      auto [liveUntilOp, after] = load.liveUntilOps[i];
-      if (liveUntilOp) {
-        liveUntilOps.push_back(after ? liveUntilOp->getNextNode()
-                                     : liveUntilOp);
-      }
+      if (Operation *liveUntilOp = load.liveUntilOps[i])
+        liveUntilOps.push_back(liveUntilOp);
     }
     if (!liveUntilOps.empty()) {
       Operation *liveUntilOp =
@@ -413,7 +409,6 @@ LogicalResult PipelinedLoadGroup::lowerLoads(WarpSchedule &schedule,
   for (Operation *asyncUser : distinctAsyncUsers) {
     if (auto mmaOp = dyn_cast<ttng::MMAv5OpInterface>(asyncUser)) {
       mmaOp.addCompletionBarrier(curEmptyBar, b.boolCst(true));
-      mmaOp.setIsAsync(true);
       continue;
     }
     llvm::report_fatal_error("FIXME: unhandled async user of pipelined load: " +
@@ -444,8 +439,6 @@ LogicalResult PipelinedLoadGroup::lowerLoads(WarpSchedule &schedule,
       StageCluster userStageCluster = getStageCluster(loadBeforeOp);
       Value loaded = b.createInto<LocalLoadOp>(*partition, userStageCluster,
                                                load.type, view);
-      b.createInto<ttng::FenceAsyncSharedOp>(*partition, userStageCluster,
-                                             /*bCluster=*/false);
       for (OpOperand *use : uses)
         use->set(loaded);
     }
@@ -686,7 +679,6 @@ static LogicalResult pipelineMMA(scf::ForOp &loop, PipelinedMMA &mma,
       allocOp->removeAttr(kPartitionAttrName);
       allocOp.getSrcMutable().clear();
       allocOp.getResult().setType(getAsMutable(allocOp.getType()));
-      propagateMutability(allocOp.getResult());
     } else if (auto tmemAllocOp = operand.getDefiningOp<ttng::TMEMAllocOp>()) {
       PartitionBuilder b(tmemAllocOp.getLoc(), tmemAllocOp);
       StageCluster stageCluster = getStageCluster(tmemAllocOp);
@@ -744,7 +736,7 @@ static LogicalResult pipelineMMA(scf::ForOp &loop, PipelinedMMA &mma,
         }
       } else {
         b.setInsertionPoint(domOp);
-        if (isa<scf::IfOp>(domOp->getParentOp()) && accIsMultiBuffered)
+        if (isa<scf::IfOp>(domOp->getParentOp()))
           b.setInsertionPointToStart(domOp->getBlock());
         Value bar = createSingleBufferView(b, node.barPrev, node.index);
         b.createInto<ttng::WaitBarrierOp>(*partition, nodeStageCluster, bar,
@@ -756,10 +748,9 @@ static LogicalResult pipelineMMA(scf::ForOp &loop, PipelinedMMA &mma,
         b.setInsertionPoint(mmaOp);
         Value bar = createSingleBufferView(b, node.barNext, node.index);
         mmaOp.addCompletionBarrier(bar, userPred);
-        mmaOp.setIsAsync(true);
       } else {
         b.setInsertionPointAfter(lastOp);
-        if (isa<scf::IfOp>(lastOp->getParentOp()) && accIsMultiBuffered)
+        if (isa<scf::IfOp>(lastOp->getParentOp()))
           b.setInsertionPoint(lastOp->getBlock()->getTerminator());
         Value bar = createSingleBufferView(b, node.barNext, node.index);
         b.createInto<ttng::ArriveBarrierOp>(*partition, nodeStageCluster, bar,
@@ -776,9 +767,7 @@ static LogicalResult pipelineMMA(scf::ForOp &loop, PipelinedMMA &mma,
     Value emptyBar = createBarrierAlloc(loop, /*numBarriers=*/1);
     Value readyBar = createBarrierAlloc(loop, /*numBarriers=*/1);
     PartitionBuilder b(defs.front()->getLoc(), loop);
-    // For Nx1 barrier allocations, pass a 1D view into barrier ops.
-    Value emptyView0 = createSingleBufferView(b, emptyBar, b.intCst(0));
-    b.create<ttng::ArriveBarrierOp>(emptyView0, /*arriveCount=*/1);
+    b.create<ttng::ArriveBarrierOp>(emptyBar, /*arriveCount=*/1);
 
     Operation *domOp = findNearestCommonDominator(defs, domInfo);
     Operation *lastOp = findNearestCommonPostDominator(defs, postDomInfo);
@@ -786,23 +775,17 @@ static LogicalResult pipelineMMA(scf::ForOp &loop, PipelinedMMA &mma,
     auto [index, phase] = addIndexAndPhase(b, loop, /*numStages=*/1);
     StageCluster srcStageCluster = getStageCluster(domOp);
     b.setInsertionPoint(domOp);
-    Value emptyView = createSingleBufferView(b, emptyBar, index);
-    b.createInto<ttng::WaitBarrierOp>(*partition, srcStageCluster, emptyView,
+    b.createInto<ttng::WaitBarrierOp>(*partition, srcStageCluster, emptyBar,
                                       phase);
 
     b.setInsertionPointAfter(lastOp);
-    Value readyView = createSingleBufferView(b, readyBar, index);
-    b.createInto<ttng::ArriveBarrierOp>(*partition, srcStageCluster, readyView,
+    b.createInto<ttng::ArriveBarrierOp>(*partition, srcStageCluster, readyBar,
                                         1);
 
     b.setInsertionPoint(mmaOp);
-    Value readyView2 = createSingleBufferView(b, readyBar, index);
     b.createInto<ttng::WaitBarrierOp>(*schedule.getPartition(mmaOp),
-                                      getStageCluster(mmaOp), readyView2,
-                                      phase);
-    Value emptyView2 = createSingleBufferView(b, emptyBar, index);
-    mmaOp.addCompletionBarrier(emptyView2, b.boolCst(true));
-    mmaOp.setIsAsync(true);
+                                      getStageCluster(mmaOp), readyBar, phase);
+    mmaOp.addCompletionBarrier(emptyBar, b.boolCst(true));
   }
 
   if (nodes.back().barNext) {

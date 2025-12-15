@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6. Data Structures &mdash; Cupti 12.8 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/omni-style.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/api-styles.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/mermaid-init.js"></script>
+        <script src="../_static/design-tabs.js"></script>
+        <script src="../_static/version.js"></script>
+        <script src="../_static/social-media.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="6.1. CUpti_Activity" href="structCUpti__Activity.html" />
+    <link rel="prev" title="5.14. CUPTI Version" href="group__CUPTI__VERSION__API.html" />
+ 
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+<a href="../index.html">
+  <img src="../_static/Logo_and_CUDA.png" class="logo" alt="Logo"/>
+</a>
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">CUPTI</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html">Overview</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../release-notes/release-notes.html">1. Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../main/main.html">2. Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library-support/library-support.html">3. Library support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../special-configurations/special-configurations.html">4. Special Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">5. Modules</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Data Structures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Activity.html">6.1. CUpti_Activity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityAPI.html">6.2. CUpti_ActivityAPI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityAutoBoostState.html">6.3. CUpti_ActivityAutoBoostState</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityBranch.html">6.4. CUpti_ActivityBranch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityBranch2.html">6.5. CUpti_ActivityBranch2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityCdpKernel.html">6.6. CUpti_ActivityCdpKernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityContext.html">6.7. CUpti_ActivityContext</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityContext2.html">6.8. CUpti_ActivityContext2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityContext3.html">6.9. CUpti_ActivityContext3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityCudaEvent.html">6.10. CUpti_ActivityCudaEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityCudaEvent2.html">6.11. CUpti_ActivityCudaEvent2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityDevice.html">6.12. CUpti_ActivityDevice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityDevice2.html">6.13. CUpti_ActivityDevice2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityDevice3.html">6.14. CUpti_ActivityDevice3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityDevice4.html">6.15. CUpti_ActivityDevice4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityDevice5.html">6.16. CUpti_ActivityDevice5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityDeviceAttribute.html">6.17. CUpti_ActivityDeviceAttribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityDeviceGraphTrace.html">6.18. CUpti_ActivityDeviceGraphTrace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityEnvironment.html">6.19. CUpti_ActivityEnvironment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityEvent.html">6.20. CUpti_ActivityEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityEventInstance.html">6.21. CUpti_ActivityEventInstance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityExternalCorrelation.html">6.22. CUpti_ActivityExternalCorrelation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityFunction.html">6.23. CUpti_ActivityFunction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityGlobalAccess.html">6.24. CUpti_ActivityGlobalAccess</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityGlobalAccess2.html">6.25. CUpti_ActivityGlobalAccess2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityGlobalAccess3.html">6.26. CUpti_ActivityGlobalAccess3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityGraphTrace.html">6.27. CUpti_ActivityGraphTrace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityGraphTrace2.html">6.28. CUpti_ActivityGraphTrace2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityInstantaneousEvent.html">6.29. CUpti_ActivityInstantaneousEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityInstantaneousEventInstance.html">6.30. CUpti_ActivityInstantaneousEventInstance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityInstantaneousMetric.html">6.31. CUpti_ActivityInstantaneousMetric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityInstantaneousMetricInstance.html">6.32. CUpti_ActivityInstantaneousMetricInstance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityInstructionCorrelation.html">6.33. CUpti_ActivityInstructionCorrelation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityInstructionExecution.html">6.34. CUpti_ActivityInstructionExecution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityJit.html">6.35. CUpti_ActivityJit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityJit2.html">6.36. CUpti_ActivityJit2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityKernel.html">6.37. CUpti_ActivityKernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityKernel2.html">6.38. CUpti_ActivityKernel2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityKernel3.html">6.39. CUpti_ActivityKernel3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityKernel4.html">6.40. CUpti_ActivityKernel4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityKernel5.html">6.41. CUpti_ActivityKernel5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityKernel6.html">6.42. CUpti_ActivityKernel6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityKernel7.html">6.43. CUpti_ActivityKernel7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityKernel8.html">6.44. CUpti_ActivityKernel8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityKernel9.html">6.45. CUpti_ActivityKernel9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMarker.html">6.46. CUpti_ActivityMarker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMarker2.html">6.47. CUpti_ActivityMarker2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMarkerData.html">6.48. CUpti_ActivityMarkerData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemDecompress.html">6.49. CUpti_ActivityMemDecompress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemcpy.html">6.50. CUpti_ActivityMemcpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemcpy3.html">6.51. CUpti_ActivityMemcpy3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemcpy4.html">6.52. CUpti_ActivityMemcpy4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemcpy5.html">6.53. CUpti_ActivityMemcpy5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemcpy6.html">6.54. CUpti_ActivityMemcpy6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemcpyPtoP.html">6.55. CUpti_ActivityMemcpyPtoP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemcpyPtoP2.html">6.56. CUpti_ActivityMemcpyPtoP2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemcpyPtoP3.html">6.57. CUpti_ActivityMemcpyPtoP3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemcpyPtoP4.html">6.58. CUpti_ActivityMemcpyPtoP4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemory.html">6.59. CUpti_ActivityMemory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemory2.html">6.60. CUpti_ActivityMemory2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemory3.html">6.61. CUpti_ActivityMemory3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemory4.html">6.62. CUpti_ActivityMemory4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemoryPool.html">6.63. CUpti_ActivityMemoryPool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemoryPool2.html">6.64. CUpti_ActivityMemoryPool2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemset.html">6.65. CUpti_ActivityMemset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemset2.html">6.66. CUpti_ActivityMemset2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemset3.html">6.67. CUpti_ActivityMemset3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMemset4.html">6.68. CUpti_ActivityMemset4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMetric.html">6.69. CUpti_ActivityMetric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityMetricInstance.html">6.70. CUpti_ActivityMetricInstance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityModule.html">6.71. CUpti_ActivityModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityName.html">6.72. CUpti_ActivityName</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityNvLink.html">6.73. CUpti_ActivityNvLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityNvLink2.html">6.74. CUpti_ActivityNvLink2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityNvLink3.html">6.75. CUpti_ActivityNvLink3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityNvLink4.html">6.76. CUpti_ActivityNvLink4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unionCUpti__ActivityObjectKindId.html">6.77. CUpti_ActivityObjectKindId</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityOpenAcc.html">6.78. CUpti_ActivityOpenAcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityOpenAccData.html">6.79. CUpti_ActivityOpenAccData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityOpenAccLaunch.html">6.80. CUpti_ActivityOpenAccLaunch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityOpenAccOther.html">6.81. CUpti_ActivityOpenAccOther</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityOpenMp.html">6.82. CUpti_ActivityOpenMp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityOverhead.html">6.83. CUpti_ActivityOverhead</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityOverhead2.html">6.84. CUpti_ActivityOverhead2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityOverhead3.html">6.85. CUpti_ActivityOverhead3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityOverheadCommandBufferFullData.html">6.86. CUpti_ActivityOverheadCommandBufferFullData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityPCSampling.html">6.87. CUpti_ActivityPCSampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityPCSampling2.html">6.88. CUpti_ActivityPCSampling2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityPCSampling3.html">6.89. CUpti_ActivityPCSampling3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityPCSamplingConfig.html">6.90. CUpti_ActivityPCSamplingConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityPCSamplingRecordInfo.html">6.91. CUpti_ActivityPCSamplingRecordInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityPcie.html">6.92. CUpti_ActivityPcie</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityPreemption.html">6.93. CUpti_ActivityPreemption</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivitySharedAccess.html">6.94. CUpti_ActivitySharedAccess</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivitySourceLocator.html">6.95. CUpti_ActivitySourceLocator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityStream.html">6.96. CUpti_ActivityStream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivitySynchronization.html">6.97. CUpti_ActivitySynchronization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivitySynchronization2.html">6.98. CUpti_ActivitySynchronization2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityUnifiedMemoryCounter.html">6.99. CUpti_ActivityUnifiedMemoryCounter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityUnifiedMemoryCounter2.html">6.100. CUpti_ActivityUnifiedMemoryCounter2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityUnifiedMemoryCounter3.html">6.101. CUpti_ActivityUnifiedMemoryCounter3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ActivityUnifiedMemoryCounterConfig.html">6.102. CUpti_ActivityUnifiedMemoryCounterConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__CallbackData.html">6.103. CUpti_CallbackData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__EventGroupSet.html">6.104. CUpti_EventGroupSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__EventGroupSets.html">6.105. CUpti_EventGroupSets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__GetCubinCrcParams.html">6.106. CUpti_GetCubinCrcParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__GetSassToSourceCorrelationParams.html">6.107. CUpti_GetSassToSourceCorrelationParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__GraphData.html">6.108. CUpti_GraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unionCUpti__MetricValue.html">6.109. CUpti_MetricValue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ModuleResourceData.html">6.110. CUpti_ModuleResourceData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__NvtxData.html">6.111. CUpti_NvtxData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingConfigurationInfo.html">6.112. CUpti_PCSamplingConfigurationInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingConfigurationInfoParams.html">6.113. CUpti_PCSamplingConfigurationInfoParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingData.html">6.114. CUpti_PCSamplingData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingDisableParams.html">6.115. CUpti_PCSamplingDisableParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingEnableParams.html">6.116. CUpti_PCSamplingEnableParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingGetDataParams.html">6.117. CUpti_PCSamplingGetDataParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingGetNumStallReasonsParams.html">6.118. CUpti_PCSamplingGetNumStallReasonsParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingGetStallReasonsParams.html">6.119. CUpti_PCSamplingGetStallReasonsParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingPCData.html">6.120. CUpti_PCSamplingPCData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingStallReason.html">6.121. CUpti_PCSamplingStallReason</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingStartParams.html">6.122. CUpti_PCSamplingStartParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PCSamplingStopParams.html">6.123. CUpti_PCSamplingStopParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__CounterDataImage__Initialize__Params.html">6.124. CUpti_PmSampling_CounterDataImage_Initialize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__CounterData__GetSampleInfo__Params.html">6.125. CUpti_PmSampling_CounterData_GetSampleInfo_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__DecodeData__Params.html">6.126. CUpti_PmSampling_DecodeData_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__Disable__Params.html">6.127. CUpti_PmSampling_Disable_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__Enable__Params.html">6.128. CUpti_PmSampling_Enable_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__GetCounterAvailability__Params.html">6.129. CUpti_PmSampling_GetCounterAvailability_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__GetCounterDataInfo__Params.html">6.130. CUpti_PmSampling_GetCounterDataInfo_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__GetCounterDataSize__Params.html">6.131. CUpti_PmSampling_GetCounterDataSize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__SetConfig__Params.html">6.132. CUpti_PmSampling_SetConfig_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__Start__Params.html">6.133. CUpti_PmSampling_Start_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__PmSampling__Stop__Params.html">6.134. CUpti_PmSampling_Stop_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__BeginPass__Params.html">6.135. CUpti_Profiler_BeginPass_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__BeginSession__Params.html">6.136. CUpti_Profiler_BeginSession_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__CounterDataImageOptions.html">6.137. CUpti_Profiler_CounterDataImageOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__CounterDataImage__CalculateScratchBufferSize__Params.html">6.138. CUpti_Profiler_CounterDataImage_CalculateScratchBufferSize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__CounterDataImage__CalculateSize__Params.html">6.139. CUpti_Profiler_CounterDataImage_CalculateSize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__CounterDataImage__InitializeScratchBuffer__Params.html">6.140. CUpti_Profiler_CounterDataImage_InitializeScratchBuffer_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__CounterDataImage__Initialize__Params.html">6.141. CUpti_Profiler_CounterDataImage_Initialize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__DeInitialize__Params.html">6.142. CUpti_Profiler_DeInitialize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__DeviceSupported__Params.html">6.143. CUpti_Profiler_DeviceSupported_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__DisableProfiling__Params.html">6.144. CUpti_Profiler_DisableProfiling_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__EnableProfiling__Params.html">6.145. CUpti_Profiler_EnableProfiling_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__EndPass__Params.html">6.146. CUpti_Profiler_EndPass_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__EndSession__Params.html">6.147. CUpti_Profiler_EndSession_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__FlushCounterData__Params.html">6.148. CUpti_Profiler_FlushCounterData_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__GetCounterAvailability__Params.html">6.149. CUpti_Profiler_GetCounterAvailability_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__ConfigAddMetrics__Params.html">6.150. CUpti_Profiler_Host_ConfigAddMetrics_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__Deinitialize__Params.html">6.151. CUpti_Profiler_Host_Deinitialize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__EvaluateToGpuValues__Params.html">6.152. CUpti_Profiler_Host_EvaluateToGpuValues_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__GetBaseMetrics__Params.html">6.153. CUpti_Profiler_Host_GetBaseMetrics_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__GetConfigImageSize__Params.html">6.154. CUpti_Profiler_Host_GetConfigImageSize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__GetConfigImage__Params.html">6.155. CUpti_Profiler_Host_GetConfigImage_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__GetMaxNumHardwareMetricsPerPass__Params.html">6.156. CUpti_Profiler_Host_GetMaxNumHardwareMetricsPerPass_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__GetMetricProperties__Params.html">6.157. CUpti_Profiler_Host_GetMetricProperties_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__GetNumOfPasses__Params.html">6.158. CUpti_Profiler_Host_GetNumOfPasses_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__GetRangeName__Params.html">6.159. CUpti_Profiler_Host_GetRangeName_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__GetSubMetrics__Params.html">6.160. CUpti_Profiler_Host_GetSubMetrics_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__GetSupportedChips__Params.html">6.161. CUpti_Profiler_Host_GetSupportedChips_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Host__Initialize__Params.html">6.162. CUpti_Profiler_Host_Initialize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__Initialize__Params.html">6.163. CUpti_Profiler_Initialize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__IsPassCollected__Params.html">6.164. CUpti_Profiler_IsPassCollected_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__PopRange__Params.html">6.165. CUpti_Profiler_PopRange_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__PushRange__Params.html">6.166. CUpti_Profiler_PushRange_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__SetConfig__Params.html">6.167. CUpti_Profiler_SetConfig_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__Profiler__UnsetConfig__Params.html">6.168. CUpti_Profiler_UnsetConfig_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__CounterDataImage__Initialize__Params.html">6.169. CUpti_RangeProfiler_CounterDataImage_Initialize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__CounterData__GetRangeInfo__Params.html">6.170. CUpti_RangeProfiler_CounterData_GetRangeInfo_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__DecodeData__Params.html">6.171. CUpti_RangeProfiler_DecodeData_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__Disable__Params.html">6.172. CUpti_RangeProfiler_Disable_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__Enable__Params.html">6.173. CUpti_RangeProfiler_Enable_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__GetCounterDataInfo__Params.html">6.174. CUpti_RangeProfiler_GetCounterDataInfo_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__GetCounterDataSize__Params.html">6.175. CUpti_RangeProfiler_GetCounterDataSize_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__PopRange__Params.html">6.176. CUpti_RangeProfiler_PopRange_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__PushRange__Params.html">6.177. CUpti_RangeProfiler_PushRange_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__SetConfig__Params.html">6.178. CUpti_RangeProfiler_SetConfig_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__Start__Params.html">6.179. CUpti_RangeProfiler_Start_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__RangeProfiler__Stop__Params.html">6.180. CUpti_RangeProfiler_Stop_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__ResourceData.html">6.181. CUpti_ResourceData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetricsDisable__Params.html">6.182. CUpti_SassMetricsDisable_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetricsEnable__Params.html">6.183. CUpti_SassMetricsEnable_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetricsFlushData__Params.html">6.184. CUpti_SassMetricsFlushData_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetricsGetDataProperties__Params.html">6.185. CUpti_SassMetricsGetDataProperties_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetricsSetConfig__Params.html">6.186. CUpti_SassMetricsSetConfig_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetricsUnsetConfig__Params.html">6.187. CUpti_SassMetricsUnsetConfig_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetrics__Config.html">6.188. CUpti_SassMetrics_Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetrics__Data.html">6.189. CUpti_SassMetrics_Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetrics__GetMetrics__Params.html">6.190. CUpti_SassMetrics_GetMetrics_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetrics__GetNumOfMetrics__Params.html">6.191. CUpti_SassMetrics_GetNumOfMetrics_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetrics__GetProperties__Params.html">6.192. CUpti_SassMetrics_GetProperties_Params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetrics__InstanceValue.html">6.193. CUpti_SassMetrics_InstanceValue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SassMetrics__MetricDetails.html">6.194. CUpti_SassMetrics_MetricDetails</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__StateData.html">6.195. CUpti_StateData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__StreamAttrData.html">6.196. CUpti_StreamAttrData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structCUpti__SynchronizeData.html">6.197. CUpti_SynchronizeData</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="namespaces.html">7. Namespaces</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../copyright-and-licenses/index.html">Copyright and Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notices-header/notices-header.html">Notices</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cupti</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+
+
+<li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+  
+<li><span class="section-number">6. </span>Data Structures</li>
+
+      <li class="wy-breadcrumbs-aside">
+      </li>
+<li class="wy-breadcrumbs-aside">
+
+
+  <span>v2025.1.1 |</span>
+
+
+
+  <a href="https://developer.nvidia.com/cupti" class="reference external">Archive</a>
+
+
+  <span>&nbsp;</span>
+</li>
+
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-structures">
+<h1><span class="section-number">6. </span>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="docutils container">
+<dl class="simple">
+<dt><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1BufferInfo.html#structcupti_1_1pcsamplingutil_1_1bufferinfo"><span class="std std-ref">CUPTI::PcSamplingUtil::BufferInfo</span></a></dt><dd><p><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1BufferInfo.html#structcupti_1_1pcsamplingutil_1_1bufferinfo"><span class="std std-ref">BufferInfo</span></a> will be stored in the file for every buffer i.e for every call of UtilDumpPcSamplingBufferInFile() API.</p>
+</dd>
+<dt><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1CUptiUtil__GetBufferInfoParams.html#structcupti_1_1pcsamplingutil_1_1cuptiutil__getbufferinfoparams"><span class="std std-ref">CUPTI::PcSamplingUtil::CUptiUtil_GetBufferInfoParams</span></a></dt><dd><p>Params for <a class="reference internal" href="namespaceCUPTI_1_1PcSamplingUtil.html#group__cupti__pcsampling__utility_1gae4c397f1c21a9baecdc74d38b1b783dd"><span class="std std-ref">CuptiUtilGetBufferInfo</span></a> .</p>
+</dd>
+<dt><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1CUptiUtil__GetHeaderDataParams.html#structcupti_1_1pcsamplingutil_1_1cuptiutil__getheaderdataparams"><span class="std std-ref">CUPTI::PcSamplingUtil::CUptiUtil_GetHeaderDataParams</span></a></dt><dd><p>Params for <a class="reference internal" href="namespaceCUPTI_1_1PcSamplingUtil.html#group__cupti__pcsampling__utility_1ga873b630c7ec1a2ada140d2f03b6934c4"><span class="std std-ref">CuptiUtilGetHeaderData</span></a> .</p>
+</dd>
+<dt><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1CUptiUtil__GetPcSampDataParams.html#structcupti_1_1pcsamplingutil_1_1cuptiutil__getpcsampdataparams"><span class="std std-ref">CUPTI::PcSamplingUtil::CUptiUtil_GetPcSampDataParams</span></a></dt><dd><p>Params for <a class="reference internal" href="namespaceCUPTI_1_1PcSamplingUtil.html#group__cupti__pcsampling__utility_1ga454395b5da004e96767fa739178431ce"><span class="std std-ref">CuptiUtilGetPcSampData</span></a> .</p>
+</dd>
+<dt><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1CUptiUtil__MergePcSampDataParams.html#structcupti_1_1pcsamplingutil_1_1cuptiutil__mergepcsampdataparams"><span class="std std-ref">CUPTI::PcSamplingUtil::CUptiUtil_MergePcSampDataParams</span></a></dt><dd><p>Params for <a class="reference internal" href="namespaceCUPTI_1_1PcSamplingUtil.html#group__cupti__pcsampling__utility_1ga4987e223c4132503d622f29ce5a9546e"><span class="std std-ref">CuptiUtilMergePcSampData</span></a> .</p>
+</dd>
+<dt><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1CUptiUtil__PutPcSampDataParams.html#structcupti_1_1pcsamplingutil_1_1cuptiutil__putpcsampdataparams"><span class="std std-ref">CUPTI::PcSamplingUtil::CUptiUtil_PutPcSampDataParams</span></a></dt><dd><p>Params for <a class="reference internal" href="namespaceCUPTI_1_1PcSamplingUtil.html#group__cupti__pcsampling__utility_1gab58ca9a7592643aa51e93d938768d754"><span class="std std-ref">CuptiUtilPutPcSampData</span></a> .</p>
+</dd>
+<dt><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1Header.html#structcupti_1_1pcsamplingutil_1_1header"><span class="std std-ref">CUPTI::PcSamplingUtil::Header</span></a></dt><dd><p><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1Header.html#structcupti_1_1pcsamplingutil_1_1header"><span class="std std-ref">Header</span></a> info will be stored in file.</p>
+</dd>
+<dt><a class="reference internal" href="structCUPTI_1_1PcSamplingUtil_1_1PcSamplingStallReasons.html#structcupti_1_1pcsamplingutil_1_1pcsamplingstallreasons"><span class="std std-ref">CUPTI::PcSamplingUtil::PcSamplingStallReasons</span></a></dt><dd><p>All available stall reasons name and respective indexes will be stored in it.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Activity.html#structcupti__activity"><span class="std std-ref">CUpti_Activity</span></a></dt><dd><p>The base activity record.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityAPI.html#structcupti__activityapi"><span class="std std-ref">CUpti_ActivityAPI</span></a></dt><dd><p>The activity record for a driver or runtime API invocation.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityAutoBoostState.html#structcupti__activityautobooststate"><span class="std std-ref">CUpti_ActivityAutoBoostState</span></a></dt><dd><p>Device auto boost state structure.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityBranch.html#structcupti__activitybranch"><span class="std std-ref">CUpti_ActivityBranch</span></a></dt><dd><p>The activity record for source level result branch.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityBranch2.html#structcupti__activitybranch2"><span class="std std-ref">CUpti_ActivityBranch2</span></a></dt><dd><p>The activity record for source level result branch.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityCdpKernel.html#structcupti__activitycdpkernel"><span class="std std-ref">CUpti_ActivityCdpKernel</span></a></dt><dd><p>The activity record for CDP (CUDA Dynamic Parallelism) kernel.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityContext.html#structcupti__activitycontext"><span class="std std-ref">CUpti_ActivityContext</span></a></dt><dd><p>The activity record for a context.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityContext2.html#structcupti__activitycontext2"><span class="std std-ref">CUpti_ActivityContext2</span></a></dt><dd><p>The activity record for a context.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityContext3.html#structcupti__activitycontext3"><span class="std std-ref">CUpti_ActivityContext3</span></a></dt><dd><p>The activity record for a context.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityCudaEvent.html#structcupti__activitycudaevent"><span class="std std-ref">CUpti_ActivityCudaEvent</span></a></dt><dd><p>The activity record for CUDA event.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityCudaEvent2.html#structcupti__activitycudaevent2"><span class="std std-ref">CUpti_ActivityCudaEvent2</span></a></dt><dd><p>The activity record for CUDA event.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityDevice.html#structcupti__activitydevice"><span class="std std-ref">CUpti_ActivityDevice</span></a></dt><dd><p>The activity record for a device.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityDevice2.html#structcupti__activitydevice2"><span class="std std-ref">CUpti_ActivityDevice2</span></a></dt><dd><p>The activity record for a device.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityDevice3.html#structcupti__activitydevice3"><span class="std std-ref">CUpti_ActivityDevice3</span></a></dt><dd><p>The activity record for a device.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityDevice4.html#structcupti__activitydevice4"><span class="std std-ref">CUpti_ActivityDevice4</span></a></dt><dd><p>The activity record for a device.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityDevice5.html#structcupti__activitydevice5"><span class="std std-ref">CUpti_ActivityDevice5</span></a></dt><dd><p>The activity record for a device.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityDeviceAttribute.html#structcupti__activitydeviceattribute"><span class="std std-ref">CUpti_ActivityDeviceAttribute</span></a></dt><dd><p>The activity record for a device attribute.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityDeviceGraphTrace.html#structcupti__activitydevicegraphtrace"><span class="std std-ref">CUpti_ActivityDeviceGraphTrace</span></a></dt><dd><p>The activity record for trace of device graph execution.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityEnvironment.html#structcupti__activityenvironment"><span class="std std-ref">CUpti_ActivityEnvironment</span></a></dt><dd><p>The activity record for CUPTI environmental data.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityEvent.html#structcupti__activityevent"><span class="std std-ref">CUpti_ActivityEvent</span></a></dt><dd><p>The activity record for a CUPTI event.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityEventInstance.html#structcupti__activityeventinstance"><span class="std std-ref">CUpti_ActivityEventInstance</span></a></dt><dd><p>The activity record for a CUPTI event with instance information.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityExternalCorrelation.html#structcupti__activityexternalcorrelation"><span class="std std-ref">CUpti_ActivityExternalCorrelation</span></a></dt><dd><p>The activity record for correlation with external records.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityFunction.html#structcupti__activityfunction"><span class="std std-ref">CUpti_ActivityFunction</span></a></dt><dd><p>The activity record for global/device functions.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityGlobalAccess.html#structcupti__activityglobalaccess"><span class="std std-ref">CUpti_ActivityGlobalAccess</span></a></dt><dd><p>The activity record for source-level global access.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityGlobalAccess2.html#structcupti__activityglobalaccess2"><span class="std std-ref">CUpti_ActivityGlobalAccess2</span></a></dt><dd><p>The activity record for source-level global access.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityGlobalAccess3.html#structcupti__activityglobalaccess3"><span class="std std-ref">CUpti_ActivityGlobalAccess3</span></a></dt><dd><p>The activity record for source-level global access.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityGraphTrace.html#structcupti__activitygraphtrace"><span class="std std-ref">CUpti_ActivityGraphTrace</span></a></dt><dd><p>The activity record for trace of graph execution.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityGraphTrace2.html#structcupti__activitygraphtrace2"><span class="std std-ref">CUpti_ActivityGraphTrace2</span></a></dt><dd><p>The activity record for trace of graph execution.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityInstantaneousEvent.html#structcupti__activityinstantaneousevent"><span class="std std-ref">CUpti_ActivityInstantaneousEvent</span></a></dt><dd><p>The activity record for an instantaneous CUPTI event.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityInstantaneousEventInstance.html#structcupti__activityinstantaneouseventinstance"><span class="std std-ref">CUpti_ActivityInstantaneousEventInstance</span></a></dt><dd><p>The activity record for an instantaneous CUPTI event with event domain instance information.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityInstantaneousMetric.html#structcupti__activityinstantaneousmetric"><span class="std std-ref">CUpti_ActivityInstantaneousMetric</span></a></dt><dd><p>The activity record for an instantaneous CUPTI metric.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityInstantaneousMetricInstance.html#structcupti__activityinstantaneousmetricinstance"><span class="std std-ref">CUpti_ActivityInstantaneousMetricInstance</span></a></dt><dd><p>The instantaneous activity record for a CUPTI metric with instance information.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityInstructionCorrelation.html#structcupti__activityinstructioncorrelation"><span class="std std-ref">CUpti_ActivityInstructionCorrelation</span></a></dt><dd><p>The activity record for source-level sass/source line-by-line correlation.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityInstructionExecution.html#structcupti__activityinstructionexecution"><span class="std std-ref">CUpti_ActivityInstructionExecution</span></a></dt><dd><p>The activity record for source-level instruction execution.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityJit.html#structcupti__activityjit"><span class="std std-ref">CUpti_ActivityJit</span></a></dt><dd><p>The activity record for JIT operations.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityJit2.html#structcupti__activityjit2"><span class="std std-ref">CUpti_ActivityJit2</span></a></dt><dd><p>The activity record for JIT operations.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityKernel.html#structcupti__activitykernel"><span class="std std-ref">CUpti_ActivityKernel</span></a></dt><dd><p>The activity record for kernel.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityKernel2.html#structcupti__activitykernel2"><span class="std std-ref">CUpti_ActivityKernel2</span></a></dt><dd><p>The activity record for kernel.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityKernel3.html#structcupti__activitykernel3"><span class="std std-ref">CUpti_ActivityKernel3</span></a></dt><dd><p>The activity record for a kernel (CUDA 6.5(with sm_52 support) onwards).</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityKernel4.html#structcupti__activitykernel4"><span class="std std-ref">CUpti_ActivityKernel4</span></a></dt><dd><p>The activity record for a kernel (CUDA 9.0(with sm_70 support) onwards).</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityKernel5.html#structcupti__activitykernel5"><span class="std std-ref">CUpti_ActivityKernel5</span></a></dt><dd><p>The activity record for a kernel (CUDA 11.0(with sm_80 support) onwards).</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityKernel6.html#structcupti__activitykernel6"><span class="std std-ref">CUpti_ActivityKernel6</span></a></dt><dd><p>The activity record for kernel.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityKernel7.html#structcupti__activitykernel7"><span class="std std-ref">CUpti_ActivityKernel7</span></a></dt><dd><p>The activity record for kernel.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityKernel8.html#structcupti__activitykernel8"><span class="std std-ref">CUpti_ActivityKernel8</span></a></dt><dd><p>The activity record for kernel.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityKernel9.html#structcupti__activitykernel9"><span class="std std-ref">CUpti_ActivityKernel9</span></a></dt><dd><p>The activity record for kernel.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMarker.html#structcupti__activitymarker"><span class="std std-ref">CUpti_ActivityMarker</span></a></dt><dd><p>The activity record providing a marker which is an instantaneous point in time.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMarker2.html#structcupti__activitymarker2"><span class="std std-ref">CUpti_ActivityMarker2</span></a></dt><dd><p>The activity record providing a marker which is an instantaneous point in time.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMarkerData.html#structcupti__activitymarkerdata"><span class="std std-ref">CUpti_ActivityMarkerData</span></a></dt><dd><p>The activity record providing detailed information for a marker.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemDecompress.html#structcupti__activitymemdecompress"><span class="std std-ref">CUpti_ActivityMemDecompress</span></a></dt><dd><p>The activity record for trace of decompression operations.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemcpy.html#structcupti__activitymemcpy"><span class="std std-ref">CUpti_ActivityMemcpy</span></a></dt><dd><p>The activity record for memory copies.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemcpy3.html#structcupti__activitymemcpy3"><span class="std std-ref">CUpti_ActivityMemcpy3</span></a></dt><dd><p>The activity record for memory copies.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemcpy4.html#structcupti__activitymemcpy4"><span class="std std-ref">CUpti_ActivityMemcpy4</span></a></dt><dd><p>The activity record for memory copies.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemcpy5.html#structcupti__activitymemcpy5"><span class="std std-ref">CUpti_ActivityMemcpy5</span></a></dt><dd><p>The activity record for memory copies.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemcpy6.html#structcupti__activitymemcpy6"><span class="std std-ref">CUpti_ActivityMemcpy6</span></a></dt><dd><p>The activity record for memory copies.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemcpyPtoP.html#structcupti__activitymemcpyptop"><span class="std std-ref">CUpti_ActivityMemcpyPtoP</span></a></dt><dd><p>The activity record for peer-to-peer memory copies.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemcpyPtoP2.html#structcupti__activitymemcpyptop2"><span class="std std-ref">CUpti_ActivityMemcpyPtoP2</span></a></dt><dd><p>The activity record for peer-to-peer memory copies.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemcpyPtoP3.html#structcupti__activitymemcpyptop3"><span class="std std-ref">CUpti_ActivityMemcpyPtoP3</span></a></dt><dd><p>The activity record for peer-to-peer memory copies.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemcpyPtoP4.html#structcupti__activitymemcpyptop4"><span class="std std-ref">CUpti_ActivityMemcpyPtoP4</span></a></dt><dd><p>The activity record for peer-to-peer memory copies.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemory.html#structcupti__activitymemory"><span class="std std-ref">CUpti_ActivityMemory</span></a></dt><dd><p>The activity record for memory.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemory2.html#structcupti__activitymemory2"><span class="std std-ref">CUpti_ActivityMemory2</span></a></dt><dd><p>The activity record for memory.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemory3.html#structcupti__activitymemory3"><span class="std std-ref">CUpti_ActivityMemory3</span></a></dt><dd><p>The activity record for memory.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemory4.html#structcupti__activitymemory4"><span class="std std-ref">CUpti_ActivityMemory4</span></a></dt><dd><p>The activity record for memory.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemoryPool.html#structcupti__activitymemorypool"><span class="std std-ref">CUpti_ActivityMemoryPool</span></a></dt><dd><p>The activity record for memory pool.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemoryPool2.html#structcupti__activitymemorypool2"><span class="std std-ref">CUpti_ActivityMemoryPool2</span></a></dt><dd><p>The activity record for memory pool.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemset.html#structcupti__activitymemset"><span class="std std-ref">CUpti_ActivityMemset</span></a></dt><dd><p>The activity record for memset.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemset2.html#structcupti__activitymemset2"><span class="std std-ref">CUpti_ActivityMemset2</span></a></dt><dd><p>The activity record for memset.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemset3.html#structcupti__activitymemset3"><span class="std std-ref">CUpti_ActivityMemset3</span></a></dt><dd><p>The activity record for memset.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMemset4.html#structcupti__activitymemset4"><span class="std std-ref">CUpti_ActivityMemset4</span></a></dt><dd><p>The activity record for memset.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMetric.html#structcupti__activitymetric"><span class="std std-ref">CUpti_ActivityMetric</span></a></dt><dd><p>The activity record for a CUPTI metric.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityMetricInstance.html#structcupti__activitymetricinstance"><span class="std std-ref">CUpti_ActivityMetricInstance</span></a></dt><dd><p>The activity record for a CUPTI metric with instance information.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityModule.html#structcupti__activitymodule"><span class="std std-ref">CUpti_ActivityModule</span></a></dt><dd><p>The activity record for a CUDA module.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityName.html#structcupti__activityname"><span class="std std-ref">CUpti_ActivityName</span></a></dt><dd><p>The activity record providing a name.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityNvLink.html#structcupti__activitynvlink"><span class="std std-ref">CUpti_ActivityNvLink</span></a></dt><dd><p>NVLink information.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityNvLink2.html#structcupti__activitynvlink2"><span class="std std-ref">CUpti_ActivityNvLink2</span></a></dt><dd><p>NVLink information.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityNvLink3.html#structcupti__activitynvlink3"><span class="std std-ref">CUpti_ActivityNvLink3</span></a></dt><dd><p>NVLink information.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityNvLink4.html#structcupti__activitynvlink4"><span class="std std-ref">CUpti_ActivityNvLink4</span></a></dt><dd><p>NVLink information.</p>
+</dd>
+<dt><a class="reference internal" href="unionCUpti__ActivityObjectKindId.html#unioncupti__activityobjectkindid"><span class="std std-ref">CUpti_ActivityObjectKindId</span></a></dt><dd><p>Identifiers for object kinds as specified by CUpti_ActivityObjectKind.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityOpenAcc.html#structcupti__activityopenacc"><span class="std std-ref">CUpti_ActivityOpenAcc</span></a></dt><dd><p>The base activity record for OpenAcc records.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityOpenAccData.html#structcupti__activityopenaccdata"><span class="std std-ref">CUpti_ActivityOpenAccData</span></a></dt><dd><p>The activity record for OpenACC data.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityOpenAccLaunch.html#structcupti__activityopenacclaunch"><span class="std std-ref">CUpti_ActivityOpenAccLaunch</span></a></dt><dd><p>The activity record for OpenACC launch.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityOpenAccOther.html#structcupti__activityopenaccother"><span class="std std-ref">CUpti_ActivityOpenAccOther</span></a></dt><dd><p>The activity record for OpenACC other.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityOpenMp.html#structcupti__activityopenmp"><span class="std std-ref">CUpti_ActivityOpenMp</span></a></dt><dd><p>The base activity record for OpenMp records.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityOverhead.html#structcupti__activityoverhead"><span class="std std-ref">CUpti_ActivityOverhead</span></a></dt><dd><p>The kinds of activity records.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityOverhead2.html#structcupti__activityoverhead2"><span class="std std-ref">CUpti_ActivityOverhead2</span></a></dt><dd><p>The activity record for CUPTI and driver overheads.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityOverhead3.html#structcupti__activityoverhead3"><span class="std std-ref">CUpti_ActivityOverhead3</span></a></dt><dd><p>The activity record for CUPTI and driver overheads.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityOverheadCommandBufferFullData.html#structcupti__activityoverheadcommandbufferfulldata"><span class="std std-ref">CUpti_ActivityOverheadCommandBufferFullData</span></a></dt><dd><p>The structure to provide additional data for CUPTI_ACTIVITY_OVERHEAD_COMMAND_BUFFER_FULL.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityPCSampling.html#structcupti__activitypcsampling"><span class="std std-ref">CUpti_ActivityPCSampling</span></a></dt><dd><p>The activity record for PC sampling.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityPCSampling2.html#structcupti__activitypcsampling2"><span class="std std-ref">CUpti_ActivityPCSampling2</span></a></dt><dd><p>The activity record for PC sampling.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityPCSampling3.html#structcupti__activitypcsampling3"><span class="std std-ref">CUpti_ActivityPCSampling3</span></a></dt><dd><p>The activity record for PC sampling.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityPCSamplingConfig.html#structcupti__activitypcsamplingconfig"><span class="std std-ref">CUpti_ActivityPCSamplingConfig</span></a></dt><dd><p>PC sampling configuration structure.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityPCSamplingRecordInfo.html#structcupti__activitypcsamplingrecordinfo"><span class="std std-ref">CUpti_ActivityPCSamplingRecordInfo</span></a></dt><dd><p>The activity record for record status for PC sampling.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityPcie.html#structcupti__activitypcie"><span class="std std-ref">CUpti_ActivityPcie</span></a></dt><dd><p>PCI devices information required to construct topology.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityPreemption.html#structcupti__activitypreemption"><span class="std std-ref">CUpti_ActivityPreemption</span></a></dt><dd><p>The activity record for a preemption of a CDP kernel.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivitySharedAccess.html#structcupti__activitysharedaccess"><span class="std std-ref">CUpti_ActivitySharedAccess</span></a></dt><dd><p>The activity record for source-level shared access.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivitySourceLocator.html#structcupti__activitysourcelocator"><span class="std std-ref">CUpti_ActivitySourceLocator</span></a></dt><dd><p>The activity record for source locator.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityStream.html#structcupti__activitystream"><span class="std std-ref">CUpti_ActivityStream</span></a></dt><dd><p>The activity record for CUDA stream.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivitySynchronization.html#structcupti__activitysynchronization"><span class="std std-ref">CUpti_ActivitySynchronization</span></a></dt><dd><p>The activity record for synchronization management.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivitySynchronization2.html#structcupti__activitysynchronization2"><span class="std std-ref">CUpti_ActivitySynchronization2</span></a></dt><dd><p>The activity record for synchronization management.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityUnifiedMemoryCounter.html#structcupti__activityunifiedmemorycounter"><span class="std std-ref">CUpti_ActivityUnifiedMemoryCounter</span></a></dt><dd><p>The activity record for Unified Memory counters (deprecated in CUDA 7.0)</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityUnifiedMemoryCounter2.html#structcupti__activityunifiedmemorycounter2"><span class="std std-ref">CUpti_ActivityUnifiedMemoryCounter2</span></a></dt><dd><p>The activity record for Unified Memory counters (deprecated in 12.8)</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityUnifiedMemoryCounter3.html#structcupti__activityunifiedmemorycounter3"><span class="std std-ref">CUpti_ActivityUnifiedMemoryCounter3</span></a></dt><dd><p>The activity record for Unified Memory counters (CUDA 7.0 and beyond)</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ActivityUnifiedMemoryCounterConfig.html#structcupti__activityunifiedmemorycounterconfig"><span class="std std-ref">CUpti_ActivityUnifiedMemoryCounterConfig</span></a></dt><dd><p>Unified Memory counters configuration structure.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__CallbackData.html#structcupti__callbackdata"><span class="std std-ref">CUpti_CallbackData</span></a></dt><dd><p>Data passed into a runtime or driver API callback function.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__EventGroupSet.html#structcupti__eventgroupset"><span class="std std-ref">CUpti_EventGroupSet</span></a></dt><dd><p>A set of event groups.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__EventGroupSets.html#structcupti__eventgroupsets"><span class="std std-ref">CUpti_EventGroupSets</span></a></dt><dd><p>A set of event group sets.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__GetCubinCrcParams.html#structcupti__getcubincrcparams"><span class="std std-ref">CUpti_GetCubinCrcParams</span></a></dt><dd><p>Params for cuptiGetCubinCrc.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__GetSassToSourceCorrelationParams.html#structcupti__getsasstosourcecorrelationparams"><span class="std std-ref">CUpti_GetSassToSourceCorrelationParams</span></a></dt><dd><p>Params for cuptiGetSassToSourceCorrelation.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__GraphData.html#structcupti__graphdata"><span class="std std-ref">CUpti_GraphData</span></a></dt><dd><p>CUDA graphs data passed into a resource callback function.</p>
+</dd>
+<dt><a class="reference internal" href="unionCUpti__MetricValue.html#unioncupti__metricvalue"><span class="std std-ref">CUpti_MetricValue</span></a></dt><dd><p>A metric value.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ModuleResourceData.html#structcupti__moduleresourcedata"><span class="std std-ref">CUpti_ModuleResourceData</span></a></dt><dd><p>Module data passed into a resource callback function.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__NvtxData.html#structcupti__nvtxdata"><span class="std std-ref">CUpti_NvtxData</span></a></dt><dd><p>Data passed into a NVTX callback function.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingConfigurationInfo.html#structcupti__pcsamplingconfigurationinfo"><span class="std std-ref">CUpti_PCSamplingConfigurationInfo</span></a></dt><dd><p>PC sampling configuration information structure.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingConfigurationInfoParams.html#structcupti__pcsamplingconfigurationinfoparams"><span class="std std-ref">CUpti_PCSamplingConfigurationInfoParams</span></a></dt><dd><p>PC sampling configuration structure.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingData.html#structcupti__pcsamplingdata"><span class="std std-ref">CUpti_PCSamplingData</span></a></dt><dd><p>Collected PC Sampling data.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingDisableParams.html#structcupti__pcsamplingdisableparams"><span class="std std-ref">CUpti_PCSamplingDisableParams</span></a></dt><dd><p>Params for cuptiPCSamplingDisable.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingEnableParams.html#structcupti__pcsamplingenableparams"><span class="std std-ref">CUpti_PCSamplingEnableParams</span></a></dt><dd><p>Params for cuptiPCSamplingEnable.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingGetDataParams.html#structcupti__pcsamplinggetdataparams"><span class="std std-ref">CUpti_PCSamplingGetDataParams</span></a></dt><dd><p>Params for cuptiPCSamplingEnable.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingGetNumStallReasonsParams.html#structcupti__pcsamplinggetnumstallreasonsparams"><span class="std std-ref">CUpti_PCSamplingGetNumStallReasonsParams</span></a></dt><dd><p>Params for cuptiPCSamplingGetNumStallReasons.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingGetStallReasonsParams.html#structcupti__pcsamplinggetstallreasonsparams"><span class="std std-ref">CUpti_PCSamplingGetStallReasonsParams</span></a></dt><dd><p>Params for cuptiPCSamplingGetStallReasons.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingPCData.html#structcupti__pcsamplingpcdata"><span class="std std-ref">CUpti_PCSamplingPCData</span></a></dt><dd><p>PC Sampling data.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingStallReason.html#structcupti__pcsamplingstallreason"><span class="std std-ref">CUpti_PCSamplingStallReason</span></a></dt><dd><p>PC Sampling stall reasons.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingStartParams.html#structcupti__pcsamplingstartparams"><span class="std std-ref">CUpti_PCSamplingStartParams</span></a></dt><dd><p>Params for cuptiPCSamplingStart.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PCSamplingStopParams.html#structcupti__pcsamplingstopparams"><span class="std std-ref">CUpti_PCSamplingStopParams</span></a></dt><dd><p>Params for cuptiPCSamplingStop.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__CounterDataImage__Initialize__Params.html#structcupti__pmsampling__counterdataimage__initialize__params"><span class="std std-ref">CUpti_PmSampling_CounterDataImage_Initialize_Params</span></a></dt><dd><p>Params for cuptiPmSamplingCounterDataImageInitialize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__CounterData__GetSampleInfo__Params.html#structcupti__pmsampling__counterdata__getsampleinfo__params"><span class="std std-ref">CUpti_PmSampling_CounterData_GetSampleInfo_Params</span></a></dt><dd><p>Params for cuptiPmSamplingCounterDataGetSampleInfo.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__DecodeData__Params.html#structcupti__pmsampling__decodedata__params"><span class="std std-ref">CUpti_PmSampling_DecodeData_Params</span></a></dt><dd><p>Params for cuptiPmSamplingDecodeData.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__Disable__Params.html#structcupti__pmsampling__disable__params"><span class="std std-ref">CUpti_PmSampling_Disable_Params</span></a></dt><dd><p>Params for cuptiPmSamplingDisable.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__Enable__Params.html#structcupti__pmsampling__enable__params"><span class="std std-ref">CUpti_PmSampling_Enable_Params</span></a></dt><dd><p>Params for cuptiPmSamplingEnable.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__GetCounterAvailability__Params.html#structcupti__pmsampling__getcounteravailability__params"><span class="std std-ref">CUpti_PmSampling_GetCounterAvailability_Params</span></a></dt><dd><p>Params for cuptiPmSamplingGetCounterData.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__GetCounterDataInfo__Params.html#structcupti__pmsampling__getcounterdatainfo__params"><span class="std std-ref">CUpti_PmSampling_GetCounterDataInfo_Params</span></a></dt><dd><p>Params for cuptiPmSamplingGetCounterDataInfo.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__GetCounterDataSize__Params.html#structcupti__pmsampling__getcounterdatasize__params"><span class="std std-ref">CUpti_PmSampling_GetCounterDataSize_Params</span></a></dt><dd><p>Params for cuptiPmSamplingGetCounterDataSize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__SetConfig__Params.html#structcupti__pmsampling__setconfig__params"><span class="std std-ref">CUpti_PmSampling_SetConfig_Params</span></a></dt><dd><p>Params for cuptiPmSamplingSetConfig.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__Start__Params.html#structcupti__pmsampling__start__params"><span class="std std-ref">CUpti_PmSampling_Start_Params</span></a></dt><dd><p>Params for cuptiPmSamplingStart.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__PmSampling__Stop__Params.html#structcupti__pmsampling__stop__params"><span class="std std-ref">CUpti_PmSampling_Stop_Params</span></a></dt><dd><p>Params for cuptiPmSamplingStop.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__BeginPass__Params.html#structcupti__profiler__beginpass__params"><span class="std std-ref">CUpti_Profiler_BeginPass_Params</span></a></dt><dd><p>Params for cuptiProfilerBeginPass.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__BeginSession__Params.html#structcupti__profiler__beginsession__params"><span class="std std-ref">CUpti_Profiler_BeginSession_Params</span></a></dt><dd><p>Params for cuptiProfilerBeginSession.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__CounterDataImageOptions.html#structcupti__profiler__counterdataimageoptions"><span class="std std-ref">CUpti_Profiler_CounterDataImageOptions</span></a></dt><dd><p>Input parameter to define the counterDataImage.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__CounterDataImage__CalculateScratchBufferSize__Params.html#structcupti__profiler__counterdataimage__calculatescratchbuffersize__params"><span class="std std-ref">CUpti_Profiler_CounterDataImage_CalculateScratchBufferSize_Params</span></a></dt><dd><p>Params for cuptiProfilerCounterDataImageCalculateScratchBufferSize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__CounterDataImage__CalculateSize__Params.html#structcupti__profiler__counterdataimage__calculatesize__params"><span class="std std-ref">CUpti_Profiler_CounterDataImage_CalculateSize_Params</span></a></dt><dd><p>Params for cuptiProfilerCounterDataImageCalculateSize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__CounterDataImage__InitializeScratchBuffer__Params.html#structcupti__profiler__counterdataimage__initializescratchbuffer__params"><span class="std std-ref">CUpti_Profiler_CounterDataImage_InitializeScratchBuffer_Params</span></a></dt><dd><p>Params for cuptiProfilerCounterDataImageInitializeScratchBuffer.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__CounterDataImage__Initialize__Params.html#structcupti__profiler__counterdataimage__initialize__params"><span class="std std-ref">CUpti_Profiler_CounterDataImage_Initialize_Params</span></a></dt><dd><p>Params for cuptiProfilerCounterDataImageInitialize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__DeInitialize__Params.html#structcupti__profiler__deinitialize__params"><span class="std std-ref">CUpti_Profiler_DeInitialize_Params</span></a></dt><dd><p>Default parameter for cuptiProfilerDeInitialize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__DeviceSupported__Params.html#structcupti__profiler__devicesupported__params"><span class="std std-ref">CUpti_Profiler_DeviceSupported_Params</span></a></dt><dd><p>Params for cuptiProfilerDeviceSupported.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__DisableProfiling__Params.html#structcupti__profiler__disableprofiling__params"><span class="std std-ref">CUpti_Profiler_DisableProfiling_Params</span></a></dt><dd><p>Params for cuptiProfilerDisableProfiling.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__EnableProfiling__Params.html#structcupti__profiler__enableprofiling__params"><span class="std std-ref">CUpti_Profiler_EnableProfiling_Params</span></a></dt><dd><p>Params for cuptiProfilerEnableProfiling.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__EndPass__Params.html#structcupti__profiler__endpass__params"><span class="std std-ref">CUpti_Profiler_EndPass_Params</span></a></dt><dd><p>Params for cuptiProfilerEndPass.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__EndSession__Params.html#structcupti__profiler__endsession__params"><span class="std std-ref">CUpti_Profiler_EndSession_Params</span></a></dt><dd><p>Params for cuptiProfilerEndSession.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__FlushCounterData__Params.html#structcupti__profiler__flushcounterdata__params"><span class="std std-ref">CUpti_Profiler_FlushCounterData_Params</span></a></dt><dd><p>Params for cuptiProfilerFlushCounterData.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__GetCounterAvailability__Params.html#structcupti__profiler__getcounteravailability__params"><span class="std std-ref">CUpti_Profiler_GetCounterAvailability_Params</span></a></dt><dd><p>Params for cuptiProfilerGetCounterAvailability.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__ConfigAddMetrics__Params.html#structcupti__profiler__host__configaddmetrics__params"><span class="std std-ref">CUpti_Profiler_Host_ConfigAddMetrics_Params</span></a></dt><dd><p>Params for cuptiProfilerHostConfigAddMetrics.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__Deinitialize__Params.html#structcupti__profiler__host__deinitialize__params"><span class="std std-ref">CUpti_Profiler_Host_Deinitialize_Params</span></a></dt><dd><p>Params for cuptiProfilerHostDeinitialize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__EvaluateToGpuValues__Params.html#structcupti__profiler__host__evaluatetogpuvalues__params"><span class="std std-ref">CUpti_Profiler_Host_EvaluateToGpuValues_Params</span></a></dt><dd><p>Params for cuptiProfilerHostEvaluateToGpuValues.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__GetBaseMetrics__Params.html#structcupti__profiler__host__getbasemetrics__params"><span class="std std-ref">CUpti_Profiler_Host_GetBaseMetrics_Params</span></a></dt><dd><p>Params for cuptiProfilerHostGetSupportedMetrics.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__GetConfigImageSize__Params.html#structcupti__profiler__host__getconfigimagesize__params"><span class="std std-ref">CUpti_Profiler_Host_GetConfigImageSize_Params</span></a></dt><dd><p>Params for cuptiProfilerHostGetConfigImageSize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__GetConfigImage__Params.html#structcupti__profiler__host__getconfigimage__params"><span class="std std-ref">CUpti_Profiler_Host_GetConfigImage_Params</span></a></dt><dd><p>Params for cuptiProfilerHostGetConfigImage.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__GetMaxNumHardwareMetricsPerPass__Params.html#structcupti__profiler__host__getmaxnumhardwaremetricsperpass__params"><span class="std std-ref">CUpti_Profiler_Host_GetMaxNumHardwareMetricsPerPass_Params</span></a></dt><dd><p>Params for cuptiProfilerHostGetMaxNumHardwareMetricsPerPass.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__GetMetricProperties__Params.html#structcupti__profiler__host__getmetricproperties__params"><span class="std std-ref">CUpti_Profiler_Host_GetMetricProperties_Params</span></a></dt><dd><p>Params for cuptiProfilerHostGetMetricProperties.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__GetNumOfPasses__Params.html#structcupti__profiler__host__getnumofpasses__params"><span class="std std-ref">CUpti_Profiler_Host_GetNumOfPasses_Params</span></a></dt><dd><p>Params for cuptiProfilerHostGetNumOfPasses.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__GetRangeName__Params.html#structcupti__profiler__host__getrangename__params"><span class="std std-ref">CUpti_Profiler_Host_GetRangeName_Params</span></a></dt><dd><p>Params for cuptiProfilerHostGetRangeName.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__GetSubMetrics__Params.html#structcupti__profiler__host__getsubmetrics__params"><span class="std std-ref">CUpti_Profiler_Host_GetSubMetrics_Params</span></a></dt><dd><p>Params for cuptiProfilerHostGetSubMetrics.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__GetSupportedChips__Params.html#structcupti__profiler__host__getsupportedchips__params"><span class="std std-ref">CUpti_Profiler_Host_GetSupportedChips_Params</span></a></dt><dd><p>Params for cuptiProfilerHostGetSupportedChips.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Host__Initialize__Params.html#structcupti__profiler__host__initialize__params"><span class="std std-ref">CUpti_Profiler_Host_Initialize_Params</span></a></dt><dd><p>Params for cuptiProfilerHostInitialize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__Initialize__Params.html#structcupti__profiler__initialize__params"><span class="std std-ref">CUpti_Profiler_Initialize_Params</span></a></dt><dd><p>Default parameter for cuptiProfilerInitialize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__IsPassCollected__Params.html#structcupti__profiler__ispasscollected__params"><span class="std std-ref">CUpti_Profiler_IsPassCollected_Params</span></a></dt><dd><p>Params for cuptiProfilerIsPassCollected.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__PopRange__Params.html#structcupti__profiler__poprange__params"><span class="std std-ref">CUpti_Profiler_PopRange_Params</span></a></dt><dd><p></p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__PushRange__Params.html#structcupti__profiler__pushrange__params"><span class="std std-ref">CUpti_Profiler_PushRange_Params</span></a></dt><dd><p></p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__SetConfig__Params.html#structcupti__profiler__setconfig__params"><span class="std std-ref">CUpti_Profiler_SetConfig_Params</span></a></dt><dd><p>Params for cuptiProfilerSetConfig.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__Profiler__UnsetConfig__Params.html#structcupti__profiler__unsetconfig__params"><span class="std std-ref">CUpti_Profiler_UnsetConfig_Params</span></a></dt><dd><p>Params for cuptiProfilerUnsetConfig.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__CounterDataImage__Initialize__Params.html#structcupti__rangeprofiler__counterdataimage__initialize__params"><span class="std std-ref">CUpti_RangeProfiler_CounterDataImage_Initialize_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerCounterDataImageInitialize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__CounterData__GetRangeInfo__Params.html#structcupti__rangeprofiler__counterdata__getrangeinfo__params"><span class="std std-ref">CUpti_RangeProfiler_CounterData_GetRangeInfo_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerCounterDataGetRangeInfo.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__DecodeData__Params.html#structcupti__rangeprofiler__decodedata__params"><span class="std std-ref">CUpti_RangeProfiler_DecodeData_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerDecodeData.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__Disable__Params.html#structcupti__rangeprofiler__disable__params"><span class="std std-ref">CUpti_RangeProfiler_Disable_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerDisable.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__Enable__Params.html#structcupti__rangeprofiler__enable__params"><span class="std std-ref">CUpti_RangeProfiler_Enable_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerEnable.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__GetCounterDataInfo__Params.html#structcupti__rangeprofiler__getcounterdatainfo__params"><span class="std std-ref">CUpti_RangeProfiler_GetCounterDataInfo_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerGetCounterDataInfo.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__GetCounterDataSize__Params.html#structcupti__rangeprofiler__getcounterdatasize__params"><span class="std std-ref">CUpti_RangeProfiler_GetCounterDataSize_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerGetCounterDataSize.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__PopRange__Params.html#structcupti__rangeprofiler__poprange__params"><span class="std std-ref">CUpti_RangeProfiler_PopRange_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerPopRange.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__PushRange__Params.html#structcupti__rangeprofiler__pushrange__params"><span class="std std-ref">CUpti_RangeProfiler_PushRange_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerPushRange.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__SetConfig__Params.html#structcupti__rangeprofiler__setconfig__params"><span class="std std-ref">CUpti_RangeProfiler_SetConfig_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerSetConfig.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__Start__Params.html#structcupti__rangeprofiler__start__params"><span class="std std-ref">CUpti_RangeProfiler_Start_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerStart.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__RangeProfiler__Stop__Params.html#structcupti__rangeprofiler__stop__params"><span class="std std-ref">CUpti_RangeProfiler_Stop_Params</span></a></dt><dd><p>Params for cuptiRangeProfilerStop.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__ResourceData.html#structcupti__resourcedata"><span class="std std-ref">CUpti_ResourceData</span></a></dt><dd><p>Data passed into a resource callback function.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetricsDisable__Params.html#structcupti__sassmetricsdisable__params"><span class="std std-ref">CUpti_SassMetricsDisable_Params</span></a></dt><dd><p>Params for cuptiSassMetricsDisable.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetricsEnable__Params.html#structcupti__sassmetricsenable__params"><span class="std std-ref">CUpti_SassMetricsEnable_Params</span></a></dt><dd><p>Params for cuptiSassMetricsEnable.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetricsFlushData__Params.html#structcupti__sassmetricsflushdata__params"><span class="std std-ref">CUpti_SassMetricsFlushData_Params</span></a></dt><dd><p>Params for cuptiSassMetricsFlushData.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetricsGetDataProperties__Params.html#structcupti__sassmetricsgetdataproperties__params"><span class="std std-ref">CUpti_SassMetricsGetDataProperties_Params</span></a></dt><dd><p>Params for cuptiSassMetricsGetDataProperties.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetricsSetConfig__Params.html#structcupti__sassmetricssetconfig__params"><span class="std std-ref">CUpti_SassMetricsSetConfig_Params</span></a></dt><dd><p>Params for cuptiSassMetricsSetConfig.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetricsUnsetConfig__Params.html#structcupti__sassmetricsunsetconfig__params"><span class="std std-ref">CUpti_SassMetricsUnsetConfig_Params</span></a></dt><dd><p>Params for cuptiSassMetricsUnsetConfig.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetrics__Config.html#structcupti__sassmetrics__config"><span class="std std-ref">CUpti_SassMetrics_Config</span></a></dt><dd><p></p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetrics__Data.html#structcupti__sassmetrics__data"><span class="std std-ref">CUpti_SassMetrics_Data</span></a></dt><dd><p></p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetrics__GetMetrics__Params.html#structcupti__sassmetrics__getmetrics__params"><span class="std std-ref">CUpti_SassMetrics_GetMetrics_Params</span></a></dt><dd><p>Params for cuptiSassMetricsGetMetrics.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetrics__GetNumOfMetrics__Params.html#structcupti__sassmetrics__getnumofmetrics__params"><span class="std std-ref">CUpti_SassMetrics_GetNumOfMetrics_Params</span></a></dt><dd><p>Params for cuptiSassMetricsGetNumOfMetrics.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetrics__GetProperties__Params.html#structcupti__sassmetrics__getproperties__params"><span class="std std-ref">CUpti_SassMetrics_GetProperties_Params</span></a></dt><dd><p>Params for cuptiSassMetricsGetProperties.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetrics__InstanceValue.html#structcupti__sassmetrics__instancevalue"><span class="std std-ref">CUpti_SassMetrics_InstanceValue</span></a></dt><dd><p></p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SassMetrics__MetricDetails.html#structcupti__sassmetrics__metricdetails"><span class="std std-ref">CUpti_SassMetrics_MetricDetails</span></a></dt><dd><p></p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__StateData.html#structcupti__statedata"><span class="std std-ref">CUpti_StateData</span></a></dt><dd><p>Data passed into a State callback function.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__StreamAttrData.html#structcupti__streamattrdata"><span class="std std-ref">CUpti_StreamAttrData</span></a></dt><dd><p>Stream attribute data passed into a resource callback function for CUPTI_CBID_RESOURCE_STREAM_ATTRIBUTE_CHANGED callback.</p>
+</dd>
+<dt><a class="reference internal" href="structCUpti__SynchronizeData.html#structcupti__synchronizedata"><span class="std std-ref">CUpti_SynchronizeData</span></a></dt><dd><p>Data passed into a synchronize callback function.</p>
+</dd>
+<dt><a class="reference internal" href="structNV_1_1Cupti_1_1Checkpoint_1_1CUpti__Checkpoint.html#structnv_1_1cupti_1_1checkpoint_1_1cupti__checkpoint"><span class="std std-ref">NV::Cupti::Checkpoint::CUpti_Checkpoint</span></a></dt><dd><p>Configuration and handle for a CUPTI Checkpoint.</p>
+</dd>
+</dl>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+<img src="../_static/NVIDIA-LogoBlack.svg" class="only-light"/>
+<img src="../_static/NVIDIA-LogoWhite.svg" class="only-dark"/>
+
+<p class="notices">
+<a href="https://www.nvidia.com/en-us/about-nvidia/privacy-policy/" target="_blank">Privacy Policy</a>
+|
+<a href="https://www.nvidia.com/en-us/about-nvidia/privacy-center/" target="_blank">Manage My Privacy</a>
+|
+<a href="https://www.nvidia.com/en-us/preferences/start/" target="_blank">Do Not Sell or Share My Data</a>
+|
+<a href="https://www.nvidia.com/en-us/about-nvidia/terms-of-service/" target="_blank">Terms of Service</a>
+|
+<a href="https://www.nvidia.com/en-us/about-nvidia/accessibility/" target="_blank">Accessibility</a>
+|
+<a href="https://www.nvidia.com/en-us/about-nvidia/company-policies/" target="_blank">Corporate Policies</a>
+|
+<a href="https://www.nvidia.com/en-us/product-security/" target="_blank">Product Security</a>
+|
+<a href="https://www.nvidia.com/en-us/contact/" target="_blank">Contact</a>
+</p>
+
+<p>
+  Copyright &#169; 2018-2025, NVIDIA Corporation &amp; Affiliates. All rights reserved.
+</p>
+
+    <p>
+      <span class="lastupdated">Last updated on Feb 13, 2025.
+      </span></p>
+
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script>
+ 
+
+
+
+</body>
+</html>

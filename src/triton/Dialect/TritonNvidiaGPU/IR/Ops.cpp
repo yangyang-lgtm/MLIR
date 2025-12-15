@@ -22,13 +22,10 @@
  */
 
 #include "mlir/IR/Builders.h"
-#include "mlir/IR/Diagnostics.h"
 #include "mlir/Support/LLVM.h"
-#include "triton/Dialect/TritonGPU/IR/Dialect.h"
-#include "triton/Dialect/TritonGPU/IR/TritonGPUInterfaces.h"
 #include "triton/Dialect/TritonNvidiaGPU/IR/Dialect.h"
+
 #include "triton/Dialect/TritonNvidiaGPU/IR/TritonNvidiaGPUOpInterfaces.cpp.inc"
-#include "triton/Dialect/TritonNvidiaGPU/Transforms/Utility.h"
 
 using namespace mlir::triton::gpu;
 
@@ -62,43 +59,10 @@ LogicalResult WarpGroupDotOp::inferReturnTypes(
 }
 
 LogicalResult WarpGroupDotOp::verify() {
-  auto resTy = getD().getType();
-  auto nvmmaEnc = dyn_cast<NvidiaMmaEncodingAttr>(resTy.getEncoding());
+  auto nvmmaEnc =
+      dyn_cast<NvidiaMmaEncodingAttr>(getD().getType().getEncoding());
   if (!nvmmaEnc || !nvmmaEnc.isHopper())
     return emitOpError("WGMMA result layout must be Hopper NVMMA");
-
-  if (!isa<NVMMASharedEncodingAttr, DotOperandEncodingAttr>(
-          getA().getType().getEncoding()))
-    return emitOpError("WGMMA A operand must have NVMMA shared or dot layout");
-  if (!isa<NVMMASharedEncodingAttr>(getB().getType().getEncoding()))
-    return emitOpError("WGMMA B operand must have NVMMA shared layout");
-
-  auto numWarps = gpu::lookupNumWarps(getOperation());
-  if (numWarps % 4)
-    return emitOpError("WGMMA requires num_warps to be divisible by 4");
-
-  auto retShapePerCTA = getShapePerCTA(resTy);
-  int rank = retShapePerCTA.size();
-  if (rank != 2)
-    return emitOpError("WGMMA result shape must be 2D");
-  if (retShapePerCTA[0] % 64 != 0)
-    return emitOpError("WGMMA result M dimension must be divisible by 64");
-  if (retShapePerCTA[1] % 8 != 0)
-    return emitOpError("WGMMA result N dimension must be divisible by 8");
-
-  auto aElemTy = getA().getType().getElementType();
-  if (!(llvm::isa<Float8E5M2Type, Float8E4M3FNType>(aElemTy) ||
-        aElemTy.isInteger(8) || aElemTy.isF16() || aElemTy.isBF16() ||
-        aElemTy.isF32()))
-    return emitOpError("WGMMA result element type must be F16, BF16, F32, "
-                       "F8E5M2, F8E4M3FN, or integer type");
-
-  if (getMaxNumImpreciseAcc() < 32 &&
-      (llvm::isa<Float8E5M2Type, Float8E4M3FNType>(aElemTy)) &&
-      resTy.getElementType().isF32()) {
-    return emitOpError("Cannot use F32 as the accumulator element type when "
-                       "the max_num_imprecise_acc is less than 32");
-  }
   return success();
 }
 
@@ -135,17 +99,21 @@ bool WarpGroupDotOp::verifyDims() {
 
 // -- WarpGroupDotWaitOp --
 LogicalResult WarpGroupDotWaitOp::inferReturnTypes(
-    MLIRContext *context, std::optional<Location> location, ValueRange operands,
-    DictionaryAttr attributes, OpaqueProperties properties, RegionRange regions,
-    SmallVectorImpl<Type> &inferredReturnTypes) {
+    ::mlir::MLIRContext *context, ::std::optional<::mlir::Location> location,
+    ::mlir::ValueRange operands, ::mlir::DictionaryAttr attributes,
+    ::mlir::OpaqueProperties properties, ::mlir::RegionRange regions,
+    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
   for (Value operand : operands)
     inferredReturnTypes.push_back(operand.getType());
-  return success();
+  return mlir::success();
 }
 
-LogicalResult WarpGroupDotWaitOp::verify() {
-  if (getOperands().empty())
-    return emitOpError("expected to be waiting on at least one dependency");
+static LogicalResult
+verifyBarrierType(Operation *op, mlir::triton::gpu::MemDescType barrierType) {
+  if (!barrierType.getElementType().isInteger(64) ||
+      barrierType.getShape() != ArrayRef<int64_t>({1}))
+    return op->emitOpError(
+        "barrier allocation must be a descriptor of 1xi64 type");
   return success();
 }
 
@@ -261,13 +229,6 @@ static void printToken(OpAsmPrinter &p, Operation *op, Value dep, Type token) {
   p << ']';
 }
 
-LogicalResult TCGen5MMAOp::verify() {
-  if (!getIsAsync() && !getBarriers().empty()) {
-    return emitOpError("The op is synchronous but a barrier is present.");
-  }
-  return success();
-}
-
 void TCGen5MMAOp::getEffects(
     SmallVectorImpl<SideEffects::EffectInstance<MemoryEffects::Effect>>
         &effects) {
@@ -321,23 +282,12 @@ void TCGen5MMAOp::setPredicate(Value pred) { getPredMutable().assign(pred); }
 void TCGen5MMAOp::build(OpBuilder &builder, OperationState &state, Type token,
                         Value a, Value b, Value d, Value accDep, Value useD,
                         Value pred, bool useTwoCTAs, ValueRange barriers,
-                        ValueRange barrierPreds, bool isAsync) {
-  if (!barriers.empty()) {
-    isAsync = true;
-  }
+                        ValueRange barrierPreds) {
   build(builder, state, token, a, b, d, accDep, useD, pred, barriers,
-        barrierPreds, isAsync ? builder.getUnitAttr() : UnitAttr(),
-        useTwoCTAs ? builder.getUnitAttr() : UnitAttr());
+        barrierPreds, useTwoCTAs ? builder.getUnitAttr() : UnitAttr());
 }
 
 // -- TCGen5MMAScaledOp --
-LogicalResult TCGen5MMAScaledOp::verify() {
-  if (!getIsAsync() && !getBarriers().empty()) {
-    return emitOpError("The op is synchronous but a barrier is present.");
-  }
-  return success();
-}
-
 void TCGen5MMAScaledOp::getEffects(
     SmallVectorImpl<SideEffects::EffectInstance<MemoryEffects::Effect>>
         &effects) {
@@ -486,57 +436,25 @@ void TCGen5MMAScaledOp::build(OpBuilder &builder, OperationState &state,
                               Value accDep, Value aScale, Value bScale,
                               ScaleDotElemType aType, ScaleDotElemType bType,
                               Value useD, Value pred, ValueRange barriers,
-                              ValueRange barrierPreds, bool isAsync) {
+                              ValueRange barrierPreds) {
   MLIRContext *ctx = builder.getContext();
-  if (!barriers.empty()) {
-    isAsync = true;
-  }
   build(builder, state, token, a, b, d, accDep, aScale, bScale,
         ScaleDotElemTypeAttr::get(ctx, aType),
         ScaleDotElemTypeAttr::get(ctx, bType), useD, pred, barriers,
-        barrierPreds, isAsync ? builder.getUnitAttr() : UnitAttr());
+        barrierPreds);
 }
 
 // -- TMEMStoreOp --
-static LogicalResult verifyTMEMOperand(Operation *op, RankedTensorType type,
-                                       MemDescType memdesc, StringRef regName) {
-  if (type.getRank() != 2)
-    return op->emitOpError(regName) << " must be a 2D tensor";
-  if (type.getEncoding()) {
-    auto enc = dyn_cast<DistributedEncodingTrait>(type.getEncoding());
-    if (!enc) {
-      return op->emitOpError(regName)
-             << " does not have an distributed encoding";
-    }
-    SmallVector<DistributedEncodingTrait> layouts =
-        getTmemCompatibleLayouts(op, type, memdesc);
-    if (layouts.empty()) {
-      return op->emitOpError(regName)
-             << " does not have any TMEM compatible layouts";
-    }
-    if (llvm::none_of(layouts, [&](DistributedEncodingTrait layout) {
-          return areLayoutsEquivalent(type.getShape(), layout, enc);
-        })) {
-      InFlightDiagnostic diag = op->emitOpError(regName)
-                                << " layout is not TMEM compatible";
-      for (Attribute layout : layouts)
-        diag.attachNote() << "potential TMEM layout: " << layout;
-      return diag;
-    }
-  }
-  return success();
-}
-
 LogicalResult TMEMStoreOp::verify() {
+  if (!isa<triton::nvidia_gpu::TensorMemorySpaceAttr>(
+          getDst().getType().getMemorySpace()))
+    return emitOpError("destination must be a tensor memory buffer.");
   if (!isa<triton::nvidia_gpu::TensorMemoryEncodingAttr,
            TensorMemoryScalesEncodingAttr>(getDst().getType().getEncoding()))
     return emitOpError("should use tensor memory encoding.");
   if (!getDst().getType().getMutableMemory()) {
     return emitOpError("Cannot store into an immutable alloc");
   }
-  if (failed(verifyTMEMOperand(*this, getSrc().getType(), getDst().getType(),
-                               "source")))
-    return failure();
   return triton::gpu::verifyMemoryOpTypes(*this, getSrc().getType(),
                                           getDst().getType());
 }
@@ -549,19 +467,16 @@ LogicalResult TMEMLoadOp::verify() {
   if (!isa<triton::nvidia_gpu::TensorMemoryEncodingAttr>(
           getSrc().getType().getEncoding()))
     return emitOpError("should use tensor memory encoding.");
-  if (failed(verifyTMEMOperand(*this, getType(), getSrc().getType(), "result")))
-    return failure();
   return triton::gpu::verifyMemoryOpTypes(*this, getSrc().getType(), getType());
 }
 
 // -- TMEMAllocOp --
 LogicalResult TMEMAllocOp::verify() {
+  if (!isa<TensorMemorySpaceAttr>(getType().getMemorySpace()))
+    return emitOpError("should create a buffer of tensor memory");
   if (!isa<TensorMemoryEncodingAttr, TensorMemoryScalesEncodingAttr>(
           getType().getEncoding()))
     return emitOpError("should use tensor memory encoding");
-  if (getSrc() &&
-      failed(verifyTMEMOperand(*this, getSrc().getType(), getType(), "source")))
-    return failure();
   return triton::gpu::verifyAllocOp(*this, getSrc(), getType());
 }
 
@@ -588,6 +503,9 @@ LogicalResult TMEMCopyOp::verify() {
   if (!isa<triton::gpu::SharedMemorySpaceAttr>(
           getSrc().getType().getMemorySpace()))
     return emitOpError("The source must be a shared memory buffer");
+  if (!isa<TensorMemoryEncodingAttr, TensorMemoryScalesEncodingAttr>(
+          getDst().getType().getEncoding()))
+    return emitOpError("The destination must be a tensor memory buffer.");
 
   if (getBarrier() && !isa<triton::gpu::SharedMemorySpaceAttr>(
                           getBarrier().getType().getMemorySpace())) {
@@ -596,41 +514,19 @@ LogicalResult TMEMCopyOp::verify() {
   if (!getDst().getType().getMutableMemory()) {
     return emitOpError("Cannot copy into an immutable alloc");
   }
+
   auto srcTy = cast<triton::gpu::MemDescType>(getSrc().getType());
   auto sharedEnc =
-      dyn_cast<triton::gpu::NVMMASharedEncodingAttr>(srcTy.getEncoding());
-  if (!sharedEnc) {
-    return emitOpError("Source must have nvmma layout.");
+      cast<triton::gpu::NVMMASharedEncodingAttr>(srcTy.getEncoding());
+
+  if (!sharedEnc || sharedEnc.getTransposed() || sharedEnc.getFp4Padded() ||
+      sharedEnc.getSwizzlingByteWidth() != 0)
+    return emitOpError("The source should not have swizzling applied for now");
+
+  if (!triton::gpu::isInnermostContiguous(srcTy, 512)) {
+    return emitOpError("The source must be in a row-major order.");
   }
-  if (sharedEnc.getTransposed() || sharedEnc.getFp4Padded())
-    return emitOpError("The source should not be transposed or passed");
-  if (isa<TensorMemoryScalesEncodingAttr>(getDst().getType().getEncoding())) {
-    if (sharedEnc.getSwizzlingByteWidth() != 0) {
-      return emitOpError("The source should not be swizzled for now");
-    }
-    if (!triton::gpu::isInnermostContiguous(srcTy, 512)) {
-      return emitOpError("The source must be in a row-major order.");
-    }
-  } else {
-    if (getSrc().getType().getShape() != getDst().getType().getShape()) {
-      return emitOpError(
-          "The source and destination must have the same shape.");
-    }
-    auto tmemEnc = dyn_cast<triton::nvidia_gpu::TensorMemoryEncodingAttr>(
-        getDst().getType().getEncoding());
-    if (!tmemEnc) {
-      return emitOpError("Incorrect tmem layout.");
-    }
-    if (tmemEnc.getBlockM() != 128) {
-      return emitOpError("Tmem layout ahouls have M=128.");
-    }
-    if (sharedEnc.getSwizzlingByteWidth() == 0) {
-      return emitOpError("Source layout should be swizzled.");
-    }
-    if (srcTy.getElementType().getIntOrFloatBitWidth() != 32) {
-      return emitOpError("Source element type should be 32-bit.");
-    }
-  }
+
   // Given that we want to support flexible input SMEM shapes, kinds of shape
   // checking we can do here are limited. For simplicity, shape checking is
   // omitted.
@@ -644,11 +540,8 @@ LogicalResult TMEMSubSliceOp::verify() {
       srcTy.getEncoding());
   if (!encoding)
     return emitOpError("The source must be a tensor memory buffer.");
-  if (!llvm::is_contained({64, 128}, encoding.getBlockM())) {
-    return emitOpError("The source tensor memory descriptor must have a 128xN "
-                       "or 64xN layout, got block_m=")
-           << encoding.getBlockM();
-  }
+  if (encoding.getBlockM() != 128)
+    return emitOpError("The source must be a 128xN layout.");
   auto dstTy = cast<triton::gpu::MemDescType>(getResult().getType());
   auto dstEncoding = dyn_cast<triton::nvidia_gpu::TensorMemoryEncodingAttr>(
       dstTy.getEncoding());
@@ -676,7 +569,7 @@ void TMEMSubSliceOp::build(OpBuilder &builder, OperationState &state,
       encoding.getUnpacked(), encoding.getCTASplitM(), encoding.getCTASplitN());
   auto subsliceType = gpu::MemDescType::get(
       shape, allocTy.getElementType(), newEncoding, allocTy.getMemorySpace(),
-      allocTy.getMutableMemory(), allocTy.getAllocShape());
+      allocTy.getMutableMemory());
   build(builder, state, subsliceType, alloc, offset);
 }
 
